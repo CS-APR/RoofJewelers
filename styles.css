@@ -1,0 +1,560 @@
+/*Coded by APR*/
+body{
+    opacity: 0;
+    transition: opacity 0.25s ease-in-out;
+
+    background-color: whitesmoke;
+    display: flex;
+    margin: 0px;
+    justify-content: center;
+    font-family: 'Playfair Display', serif;
+}
+h1,h2,h3,h4,h5,h6{
+    font-weight: normal;
+}
+p{
+    color: gray;
+    font-size: 13pt;
+    line-height: 2;
+}
+.mainContainer{
+    background-color: white;
+    margin: 0px;
+    display: flex;
+    width: 1200px;
+    margin-left:auto;
+    margin-right: auto;
+    flex-direction: column;
+}
+@media screen and (max-width: 1200px){
+    .mainContainer{
+        width: 900px;
+    }
+}
+@media screen and (max-width: 900px){
+    .mainContainer{
+        width: 600px;
+    }
+}
+@media screen and (max-width: 600px){
+    .mainContainer{
+        width: 100%;
+    }
+}
+/*header.html formating*
+    /* logo format*/
+        #headlogo{
+            display: flex;
+            justify-content: center;  
+        }
+        .logo-container{
+            display: grid;
+            width: 500px;
+            place-items: center;
+        }
+        #rjlogo {
+            height:140px;
+            margin-top: 15px;
+            grid-area: 1,1;
+        }
+        #header-info{
+            grid-area: 2,1;
+            text-align: center;
+        }
+
+    /*Tabbar formating*/
+        .tabbar{
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 20px;
+            font-size: 14pt;
+        }
+        .tabitem{
+            position: relative;
+            display: flex;
+            cursor: pointer;
+        }
+        .tabitem a:hover{
+            color: darkslategrey;
+        }
+        .tabitem a{
+            display: block;
+            padding: 10px;
+        }
+
+    /* search bar styling*/
+        .tabitem #search{
+            position: relative;
+            display: block;
+            height: 40px; width: 40px;
+
+            text-align: center;
+            margin-top: auto; margin-bottom: auto;
+            
+            font-size: 20pt;
+        }
+        .tabitem #search span:active{
+            background-color: whitesmoke;
+            outline: 1px gray dashed;
+        }
+        .tabitem span{
+            color: black;
+            display: flex;
+
+            width: 100%;
+            height: 100%;
+
+            align-items: center;
+            justify-content: center;
+
+            font-weight: bold;
+        }
+        .tabitem span:hover{
+            color: gray;
+        }
+        #searchBox{
+            display: none;
+            position:absolute;
+            top:120%;
+            right:0;
+
+            background-color: white;
+            border: 1px black solid;
+
+            min-width: 200px;
+            padding: 10px;
+            z-index: 999; /*forces it above other screen items*/
+        }
+        #searchBox.open{
+            display: grid;
+            grid-template-columns: 1fr auto;
+            align-items: center;
+            gap: 5px;
+        }
+        #searchBox #searchBar{
+            margin-bottom: 8px;
+            height: 25px;   
+            width: 100%;     
+            box-sizing: border-box;
+        }
+        #searchBox #execute{
+            display: flex;
+            height: 25px; width: 25px;
+
+            padding: 0px;
+            
+            background: black;
+            color: white;
+
+            font-size: 12pt;
+            
+            align-items: center;
+            justify-content: center;          
+        }
+        #searchBox #execute:hover{
+            background-color: darkslategrey;
+        }
+    /* end search bar styling*/
+
+        .tabbar a{
+            color: black;
+            text-decoration: none;
+        }
+    /*tabbar dropdown formating*/
+        .dropdown {
+            display: none;
+            position:absolute;
+            top:100%;
+            right:0;
+
+            background-color: white;
+            border: 1px black solid;
+
+            min-width: 150px;
+            z-index: 1000; /*forces it above other screen items*/
+        }
+        .dropdown a, .subdropdown a{
+            display: block;
+            padding: 0px 10px;
+            
+            font-size: 10pt;
+            white-space: nowrap;
+        }
+        .dropdown a:hover, .subdropdown a:hover{
+            background-color: whitesmoke;
+        }
+        .tabitem:hover .dropdown, .dropdownitem:hover .subdropdown{
+            display: block;
+        }
+        .dropdownitem{
+            position: relative;
+        }
+        .subdropdown{
+            display: none;
+            position:absolute;
+            top:0;
+            left:100%;
+
+            background-color: white;
+            border: 1px black solid;
+            
+            min-width: 150px;
+            z-index: 1001; /*forces it above other screen items*/
+        }
+
+    /*end tabbar formating*/
+/***** end header and body ******/
+
+
+/*footer format*/
+    #footer-placeholder{
+        display: flex;
+        justify-content: center;
+        width: 100%;
+    }
+    .footer{
+        display: flex;
+        flex-direction: column;
+        width: 90%;
+        border-top: 1px gray solid;
+        margin-top:30px;
+        padding-top: 25px;
+    }
+    .footsections{
+        display:flex;
+        justify-content: space-between;
+        gap: 30px;
+        width: 100%;
+        flex-wrap: wrap;
+    }
+    .footbox{        
+        flex:1;
+        min-width: 200px;
+    }
+    .footer a{
+        color: gray;
+        font-size: 13pt;
+        line-height: 2;
+        text-decoration: none;
+    }
+    .footer #credit{
+        margin-top: 100px;
+        margin-bottom: 50px;
+    }
+/*end footer format*/
+
+/* Index page format */
+    .disclaimer{
+        align-self: center;
+        width: 90%;
+    }
+
+    /* slideshow */
+    .slidecontainer{
+        overflow: hidden;
+        width: 100%;
+        margin-top:30px; 
+    }
+    .slideshow{               
+        position: relative;   
+        width:100%;
+        overflow: hidden;
+    }
+    #track {
+        display: flex;
+        width: 100%;
+        transition: transform 0.7s ease-in-out;   
+    }
+    .slide{
+        min-width:100%;
+        user-select: none;
+    }
+    .slide img{
+        width: 100%;
+        display: block;
+    }
+    #left{
+        position: absolute;
+        top:50%;
+        left:1%;
+        cursor: pointer;
+        width: 4%;
+    }
+    #right{
+        position: absolute;
+        top:50%;
+        left:95%;
+        cursor: pointer;
+        width: 4%;
+    }
+    /********* end slideshow************/
+    .ad-container{
+        display: flex;
+        width:90%;
+        margin-left:auto;
+        margin-right:auto;                    
+    }
+    @media screen and (max-width: 800px){
+        .ad-container{
+            flex-direction: column;  
+        }
+    }
+    .ads, .ads img{
+        width:100%;
+    }
+    .featured{
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+    .featured #featured-title{
+        margin-left:auto; margin-right: auto;
+        margin-top: 50px;
+        width: 90%;
+        text-align: center;
+        font-size: 25pt;
+        border-top: 1px black solid; border-bottom: 1px black solid;
+        padding-top:5px; padding-bottom:5px;
+    }
+    /* #featured-content formated in catalog page section with product-content*/ 
+
+/*end index page format*/
+
+/*info page format*/
+    .infocontainer{
+        width: 90%;
+        margin-top: 30px;
+        display: flex;               
+
+        align-self: center;
+
+        flex-direction: column;
+    }
+    #infocontainer #loose-stones-flyer{
+        margin-left: 0px;
+        width: 40%;
+    }
+    #infocontainer{
+        width: 90%;
+        margin-top: 30px;
+        display: flex;               
+
+        align-self: center;
+
+        flex-direction: column;
+    }
+    .infobox{
+        width:100%;
+        border-top: 1px black solid;
+    }
+    .infobox ul,ol, a{
+        color: gray;
+        font-size: 13pt;
+        line-height: 2;
+    }
+    .infobox img{
+        width:90%;
+        display: block;
+        margin-left:auto;
+        margin-right:auto;
+        margin-bottom: 10px;;              
+    }
+/*end info page format*/
+
+/* catalog page format*/
+    #subheader{
+        width:90%;
+        margin-top:30px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+    #product-content, #featured-content{
+        width: 90%;
+        margin-left: auto;
+        margin-right: auto;
+
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px,1fr));
+    }
+    #product-content{
+        opacity: 1;
+        transition: opacity 0.2s ease;
+    }
+    #tree-bar{    
+        vertical-align:auto;
+
+        background-color: whitesmoke;
+
+        border-radius: 5px;
+        margin-bottom: 40px;
+
+        padding-left: 15px;
+        padding-right: 15px;
+    }
+    #tree-bar a, strong{
+        text-decoration: none;
+        color: black;
+        font-size: 14pt;
+    }
+    #tree-bar a:hover{
+        color: gray;
+    }
+    #subheader h1{
+        padding-bottom: 15px;
+        border-bottom: 1px black solid;
+    }
+    #categories{
+        display: flex;
+        flex-wrap: wrap;
+    }
+    #categories #cat-header{
+        min-width: 100%;
+        margin-top: -5px;
+    }
+    #categories div{
+        width:fit-content;
+        height: fit-content;
+        padding: 5px;
+        margin: 5px;
+
+        background-color: whitesmoke;
+        border-radius: 5px;
+    }
+    #categories div a{
+        text-decoration: none;
+        color:gray;
+    }
+    #categories div a:hover{
+        color:black;
+    }    
+
+            /*product setting format*/
+            #content-settings{
+                width: 90%;
+
+                margin-left: auto;
+                margin-right: auto;
+                display: flex;
+                flex-wrap: wrap;
+            }
+            #content-settings p{
+                font-size: 13pt;
+                color: black;
+            }
+            #content-settings div{
+                margin:5px;
+            }
+            #content-settings .dropdown-container{
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+            select{
+                border: 1px gray solid;
+                border-radius: 0px;
+                padding: 5px;
+                background-color: white;
+
+                font-family: 'Playfair Display', serif;
+                color: darkslategray;
+                font-size:10pt;              
+            }
+            #showcount{
+                cursor: pointer;
+            }
+        /*end product settings*/
+        /*product content display format*/
+            .item-card{
+                border-radius: 20px;
+                outline: 2px solid gray;
+                overflow: hidden;
+                
+                width: 250px;
+                display: grid;
+
+                justify-content: center;
+                text-align: center;
+
+                margin: 10px;                       
+            }
+            .item-card:hover{
+                outline: 5px solid gray;
+            }
+            .item-card .item-card1{
+                width: 100%;
+                grid-area: 3,1;
+            }
+            .item-card .item-card2{
+                min-height: 100px;
+                max-width: 100%;
+                min-width: 100%;
+
+                justify-content: center;
+                text-align: center;
+                align-self: center;
+
+                margin-right: auto;
+                margin-left: auto;
+
+                grid-area: 3,2;               
+                font-size: 14pt;
+            }
+            .item-card .item-card2 .price{
+                color: gray;       
+            }
+            .item-card .item-card1 img{                
+                object-fit: contain;  
+                width: 100%;               
+                height: 250px;
+            }
+        /* end product content format*/
+        /*page par format*/
+            #pageBar{
+                display: flex;
+                width:90%;
+                margin-top: 50px;
+                margin-left: auto;
+                margin-right: auto;
+                justify-content: center;
+            }
+            #pageBar div{
+                border: 1px black solid;
+                padding:5px;
+                font-size: 14pt;
+                width: fit-content;
+            }
+            .pageNumbers:hover, #prev:hover, #next:hover{
+                background-color: whitesmoke;
+                color: darkslategrey;
+            }
+            #pageBar .pageNumbers{
+                width: 25px;
+                align-content: center;
+                text-align: center;
+            }
+            .currentPage, .currentPage:hover{
+                width: 25px;
+                align-content: center;
+                text-align: center;
+                background-color: black;
+                color: white;
+            }
+        /*end page bar format*/
+/* end catalog page format*/
+
+
+/* cosmetic classes*/
+
+.fadedtype{
+    font-style: italic;
+    color: gray;
+    font-size: 12pt;
+}
+
+@media screen and (max-width: 1000px){
+    .ads img{
+        height: 150px;
+    }
+}

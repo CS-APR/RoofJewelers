@@ -1,0 +1,751 @@
+[
+    {
+        "id":"home",
+        "title":"Home",
+        "link":"index.html",
+
+        "description":"Serving the Columbia, SC area's jewelry needs for over 80 years, Roof Jewelers offers a wide selection of fine jewelry, repair services and gold buying"
+    },
+    {
+        "showInNav": false,
+        "id":"showroom",
+        "title":"Showroom",
+
+        "slug":"showroom",
+        "description":"",
+
+        "children": [
+            {
+                "id":"bridal-collection",
+                "title":"Bridal Collection",
+
+                "slug":"bridal-collection",
+                "description":"",
+
+                "children": [
+                    {
+                        "id":"bridal-sets",
+                        "title":"Bridal Sets",
+
+                        "slug":"bridal-sets",
+                        "description":""
+                    },
+                    {
+                        "id":"bridal-engagement-rings",
+                        "title":"Engagement Rings",
+
+                        "slug":"engagement-rings",
+                        "description":""
+                    },
+                    {
+                        "id":"bridal-insert-and-guard-rings",
+                        "title":"Insert & Guard Rings",
+
+                        "slug":"insert-and-guard-rings",
+                        "description":""
+                    },
+                    {
+                        "id":"bridal-wedding-bands",
+                        "title":"Wedding Bands",
+
+                        "slug":"wedding-bands",
+                        "description":"",
+
+                        "children": [
+                            {
+                                "id":"bridal-wedding-gents-bands",
+                                "title":"Gents Bands",
+
+                                "slug":"gents-bands",
+                                "description":""
+                            },
+                            {
+                                "id":"bridal-wedding-ladies-bands",
+                                "title":"Ladies Bands",
+
+                                "slug":"ladies-bands",
+                                "description":""
+                            }
+                        ]
+                    },
+                    {
+                        "id":"bridal-loose-diamonds",
+                        "title":"Loose Diamonds",
+
+                        "lslug":"loose-stones",
+                        "description":"Explore our Selection of Loose Diamonds and other Stones available at Roof Jewelers."
+                    }
+                ]
+            },
+            {
+                "id":"jewelry",
+                "title":"Jewelry",
+
+                "slug":"jewelry",
+                "description":"",
+
+                "children": [
+                    {
+                        "id":"jewelry-bracelets-and-anklets",
+                        "title":"Bracelets & Anklets",
+
+                        "slug":"bracelets-and-anklets",
+                        "description":"",
+
+                        "children": [
+                            {
+                                "id":"jewelry-bracelets-and-anklets-bracelets",
+                                "title":"Bracelets",
+
+                                "slug":"bracelets",
+                                "description":""
+                            },
+                            {
+                                "id":"jewelry-bracelets-and-anklets-charms-bracelets",
+                                "title":"Charm Bracelets",
+
+                                "slug":"charm-bracelets",
+                                "description":""
+                            },
+                            {
+                                "id":"jewelry-bracelets-and-anklets-anklets",
+                                "title":"Anklets",
+
+                                "slug":"anklets",
+                                "description":""
+                            },
+                            {
+                                "id":"jewelry-bracelets-and-anklets-lestage-convertibles",
+                                "title":"Lestage Convertibles",
+
+                                "slug":"lestage-convertibles",
+                                "description":""
+                            }
+                        ]
+                    },
+                    {
+                        "id":"jewelry-charms",
+                        "title":"Charms",
+
+                        "slug":"charms",
+                        "description":""                  
+                    },
+                    {
+                        "id":"jewelry-childrens",
+                        "title":"Children's Jewelry",
+
+                        "slug":"childrens-jewelry",
+                        "description":""
+                    },
+                    {
+                        "id":"jewelry-class-rings",
+                        "title":"Class Rings",
+
+                        "lslug":"class-rings",
+                        "description":"At Roof Jewelers, we offer an exceptional value in class rings. With a highly customizable catalog to choose from you can put together the perfect ring."
+                    },
+                    {
+                        "id":"jewelry-rings",
+                        "title":"Rings",
+
+                        "slug":"rings",
+                        "description":""
+                    },
+                    {
+                        "id":"jewelry-earrings",
+                        "title":"Earrings",
+
+                        "slug":"earrings",
+                        "description":""
+                    },
+                    {
+                        "id":"jewelry-engravables",
+                        "title":"Engravables",
+
+                        "slug":"engravables",
+                        "description":""
+                    },
+                    {
+                        "id":"jewelry-mens-jewelry",
+                        "title":"Men's Jewelry",
+
+                        "slug":"mens-jewelry",
+                        "description":""
+                    },
+                    {
+                        "id":"jewelry-necklaces-and-pendants",
+                        "title":"Necklaces & Pendants",
+
+                        "slug":"necklaces-and-pendants",
+                        "description":"",
+
+                        "children": [
+                            {
+                                "id":"jewelry-necklaces-and-pendants-necklaces",
+                                "title":"Necklaces",
+
+                                "slug":"necklaces",
+                                "description":""
+                            },
+                            {
+                                "id":"jewelry-necklaces-and-pendants-chains",
+                                "title":"Chains",
+
+                                "slug":"chains",
+                                "description":""
+                            },
+                            {
+                                "id":"jewelry-necklaces-and-pendants-lockets",
+                                "title":"Lockets",
+
+                                "slug":"lockets",
+                                "description":""
+                            },
+                            {
+                                "id":"jewelry-necklaces-and-pendants-pendants",
+                                "title":"Pendants",
+
+                                "slug":"pendants",
+                                "description":""
+                            },
+                            {
+                                "id":"jewelry-necklaces-and-pendants-religious",
+                                "title":"Religious",
+
+                                "slug":"religious",
+                                "description":""
+                            }
+                        ]
+                    },
+                    {
+                        "id":"jewelry-pearls",
+                        "title":"Pearls",
+
+                        "slug":"pearls",
+                        "description":""
+                    }
+                ]
+            },
+            {
+                "id":"watches",
+                "title":"Watches",
+
+                "slug":"watches",
+                "description":"",
+
+                "children": [
+                    {
+                        "id":"watches-mens",
+                        "title":"Mens' Watches",
+
+                        "slug":"mens-watches",
+                        "description":""
+                    },
+                    {
+                        "id":"watches-ladies",
+                        "title":"Ladies' Watches",
+
+                        "slug":"ladies-watches",
+                        "description":""
+                    },
+                    {
+                        "id":"watches-watch-bands",
+                        "title":"Watch Bands",
+                        "slug":"watch-bands",
+                        "description":""
+                    }
+                ]
+            },
+            {
+                "id":"estate",
+                "title":"Estate",
+
+                "slug":"estate",
+                "description":"",
+
+                "children": [
+                    {
+                        "id":"estate-rings",
+                        "title":"Rings",
+
+                        "slug":"rings",
+                        "description":""
+                    },
+                    {
+                        "id":"estate-earrings",
+                        "title":"Earrings",
+
+                        "slug":"earrings",
+                        "description":""
+                    },
+                    {
+                        "id":"estate-necklaces-and-pendants",
+                        "title":"Necklaces & Pendants",
+
+                        "slug":"necklaces-and-pendants",
+                        "description":""
+                    },
+                    {
+                        "id":"estate-pins",
+                        "title":"Pins",
+
+                        "slug":"pins",
+                        "description":""
+                    },
+                    {
+                        "id":"estate-misc",
+                        "title":"Miscellaneous",
+
+                        "slug":"miscellaneous",
+                        "description":""
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "id":"bridal-collection",
+        "title":"Bridal Collection",
+
+        "slug":"bridal-collection",
+        "description":"",
+
+        "children": [
+            {
+                "id":"bridal-sets",
+                "title":"Bridal Sets",
+
+                "slug":"bridal-sets",
+                "description":""
+            },
+            {
+                "id":"bridal-engagement-rings",
+                "title":"Engagement Rings",
+
+                "slug":"engagement-rings",
+                "description":""
+            },
+            {
+                "id":"bridal-insert-and-guard-rings",
+                "title":"Insert & Guard Rings",
+
+                "slug":"insert-and-guard-rings",
+                "description":""
+            },
+            {
+                "id":"bridal-wedding-bands",
+                "title":"Wedding Bands",
+
+                "slug":"wedding-bands",
+                "description":"",
+
+                "children": [
+                    {
+                        "id":"bridal-wedding-gents-bands",
+                        "title":"Gents Bands",
+
+                        "slug":"gents-bands",
+                        "description":""
+                    },
+                    {
+                        "id":"bridal-wedding-ladies-bands",
+                        "title":"Ladies Bands",
+
+                        "slug":"ladies-bands",
+                        "description":""
+                    }
+                ]
+            },
+            {
+                "id":"bridal-loose-diamonds",
+                "title":"Loose Diamonds",
+
+                "lslug":"loose-stones",
+                "description":"Explore our Selection of Loose Diamonds and other Stones available at Roof Jewelers."
+            }
+        ]
+    },
+    {
+        "id":"jewelry",
+        "title":"Jewelry",
+
+        "slug":"jewelry",
+        "description":"",
+
+        "children": [
+            {
+                "id":"jewelry-bracelets-and-anklets",
+                "title":"Bracelets & Anklets",
+
+                "slug":"bracelets-and-anklets",
+                "description":"",
+
+                "children": [
+                    {
+                        "id":"jewelry-bracelets-and-anklets-bracelets",
+                        "title":"Bracelets",
+
+                        "slug":"bracelets",
+                        "description":""
+                    },
+                    {
+                        "id":"jewelry-bracelets-and-anklets-charms-bracelets",
+                        "title":"Charm Bracelets",
+
+                        "slug":"charm-bracelets",
+                        "description":""
+                    },
+                    {
+                        "id":"jewelry-bracelets-and-anklets-anklets",
+                        "title":"Anklets",
+
+                        "slug":"anklets",
+                        "description":""
+                    },
+                    {
+                        "id":"jewelry-bracelets-and-anklets-lestage-convertibles",
+                        "title":"Lestage Convertibles",
+
+                        "slug":"lestage-convertibles",
+                        "description":""
+                    }
+                ]
+            },
+            {
+                "id":"jewelry-charms",
+                "title":"Charms",
+
+                "slug":"charms",
+                "description":""                  
+            },
+            {
+                "id":"jewelry-childrens",
+                "title":"Children's Jewelry",
+
+                "slug":"childrens-jewelry",
+                "description":""
+            },
+            {
+                "id":"jewelry-class-rings",
+                "title":"Class Rings",
+
+                "lslug":"class-rings",
+                "description":"At Roof Jewelers, we offer an exceptional value in class rings. With a highly customizable catalog to choose from you can put together the perfect ring."
+            },
+            {
+                "id":"jewelry-rings",
+                "title":"Rings",
+
+                "slug":"rings",
+                "description":""
+            },
+            {
+                "id":"jewelry-earrings",
+                "title":"Earrings",
+
+                "slug":"earrings",
+                "description":""
+            },
+            {
+                "id":"jewelry-engravables",
+                "title":"Engravables",
+
+                "slug":"engravables",
+                "description":""
+            },
+            {
+                "id":"jewelry-mens-jewelry",
+                "title":"Men's Jewelry",
+
+                "slug":"mens-jewelry",
+                "description":""
+            },
+            {
+                "id":"jewelry-necklaces-and-pendants",
+                "title":"Necklaces & Pendants",
+
+                "slug":"necklaces-and-pendants",
+                "description":"",
+
+                "children": [
+                    {
+                        "id":"jewelry-necklaces-and-pendants-necklaces",
+                        "title":"Necklaces",
+
+                        "slug":"necklaces",
+                        "description":""
+                    },
+                    {
+                        "id":"jewelry-necklaces-and-pendants-chains",
+                        "title":"Chains",
+
+                        "slug":"chains",
+                        "description":""
+                    },
+                    {
+                        "id":"jewelry-necklaces-and-pendants-lockets",
+                        "title":"Lockets",
+
+                        "slug":"lockets",
+                        "description":""
+                    },
+                    {
+                        "id":"jewelry-necklaces-and-pendants-pendants",
+                        "title":"Pendants",
+
+                        "slug":"pendants",
+                        "description":""
+                    },
+                    {
+                        "id":"jewelry-necklaces-and-pendants-religious",
+                        "title":"Religious",
+
+                        "slug":"religious",
+                        "description":""
+                    }
+                ]
+            },
+            {
+                "id":"jewelry-pearls",
+                "title":"Pearls",
+
+                "slug":"pearls",
+                "description":""
+            }
+        ]
+    },
+    {
+        "id":"watches",
+        "title":"Watches",
+
+        "slug":"watches",
+        "description":"",
+
+        "children": [
+            {
+                "id":"watches-mens",
+                "title":"Mens' Watches",
+
+                "slug":"mens-watches",
+                "description":""
+            },
+            {
+                "id":"watches-ladies",
+                "title":"Ladies' Watches",
+
+                "slug":"ladies-watches",
+                "description":""
+            },
+            {
+                "id":"watches-watch-bands",
+                "title":"Watch Bands",
+                "slug":"watch-bands",
+                "description":""
+            }
+        ]
+    },
+    {
+        "id":"estate",
+        "title":"Estate",
+
+        "slug":"estate",
+        "description":"",
+
+        "children": [
+            {
+                "id":"estate-rings",
+                "title":"Rings",
+
+                "slug":"rings",
+                "description":""
+            },
+            {
+                "id":"estate-earrings",
+                "title":"Earrings",
+
+                "slug":"earrings",
+                "description":""
+            },
+            {
+                "id":"estate-necklaces-and-pendants",
+                "title":"Necklaces & Pendants",
+
+                "slug":"necklaces-and-pendants",
+                "description":""
+            },
+            {
+                "id":"estate-pins",
+                "title":"Pins",
+
+                "slug":"pins",
+                "description":""
+            },
+            {
+                "id":"estate-misc",
+                "title":"Miscellaneous",
+
+                "slug":"miscellaneous",
+                "description":""
+            }
+        ]
+    },
+    {
+        "id":"services-and-repair",
+        "title":"Services & Repair",
+
+        "lslug":"services-and-repair",
+        "description":"",
+
+        "children": [
+            {
+                "id":"services-and-repair-financing",
+                "title":"Financing Options",
+                "lslug":"financing-options",
+                "description":"Explore flexible financing options at Roof Jewelers with Snap Finance or our convenient in-store layaway service. Shop confidently for your jewelry and gifts."
+            },
+            {
+                "id":"services-and-repair-jewelry-repair",
+                "title":"Jewelry Repair",
+                "lslug":"jewelry-repair",
+                "description":"Experts in jewelry repair since 1943 Roof Jewelers is the place for reliable and quality service. Repair services include: chain repair, ring sizing, prong repair, stone replacement, pearl restringing, and engraving."
+            },
+            {
+                "id":"services-and-repair-jewelry-care",
+                "title":"Jewelry Care Products",
+                "slug":"jewelry-care-products",
+                "description":""
+            },
+            {
+                "id":"services-and-repair-watch-repair",
+                "title":"Watch Repair",
+                "lslug":"watch-repair",
+                "description":"With 80 years of experience Roof Jewelers offers expert watch repair. From band, battery and crystal replacement to band repair. Visit us for reliable quality service."
+            }
+        ]
+    },
+    {
+        "id":"brands",
+        "title":"Brands",
+
+        "lslug":"brands",
+        "description":"Discover a wide selection of premium brands at Roof Jewelers. Explore quality craftsmanship and timeless designs with us.",
+
+        "children": [
+            {
+                "id":"brands-artcarved",
+                "title":"ArtCarved Bridal",
+                "slug":"artcarved-bridal",
+                "description":""
+            },
+            {
+                "id":"brands-camelot",
+                "title":"Camelot",
+                "slug":"camelot",
+                "description":""
+            },
+            {
+                "id":"brands-carla-earrings",
+                "title":"Carla Earrings",
+                "slug":"carla-earrings",
+                "description":""
+            },
+            {
+                "id":"brands-citizen",
+                "title":"Citizen",
+                "slug":"citizen",
+                "description":""
+            },
+            {
+                "id":"brands-classic-of-new-york",
+                "title":"Classic of New York",
+                "slug":"classic-of-new-york",
+                "description":""
+            },
+            {
+                "id":"brands-gabriel-and-co",
+                "title":"Gabriel & Co.",
+                "slug":"gabriel-and-co",
+                "description":""
+            },
+            {
+                "id":"brands-goldman",
+                "title":"Goldman Wedding Bands",
+                "slug":"goldman-wedding-bands",
+                "description":""
+            },
+            {
+                "id":"brands-inox",
+                "title":"Inox - Men's Jewelry",
+                "slug":"inox-mens-jewelry",
+                "description":""
+            },
+            {
+                "id":"brands-kiddie-kraft",
+                "title":"Kiddie Kraft",
+                "slug":"kiddie-kraft",
+                "description":""
+            },
+            {
+                "id":"brands-lafonn",
+                "title":"Lafonn",
+                "slug":"lafonn",
+                "description":""
+            },
+            {
+                "id":"brands-leslies-gold",
+                "title":"Leslies' Gold",
+                "slug":"leslies-gold",
+                "description":""
+            },
+            {
+                "id":"brands-rembrandt",
+                "title":"Rembrand Charms",
+                "link":"https://www.rembrandtcharms.com/",
+                "description":""
+            },
+            {
+                "id":"brands-royal-chain",
+                "title":"Royal Chain",
+                "slug":"royal-chain",
+                "description":""
+            },
+            {
+                "id":"brands-southern-gates",
+                "title":"Southern Gates",
+                "slug":"southern-gates",
+                "description":""
+            },
+            {
+                "id":"brands-thorsten",
+                "title":"Thorsten Rings",
+                "slug":"thorsten-rings",
+                "description":""
+            }
+        ]
+    },
+
+    {
+        "showInNav": false,
+        "id":"about-us",
+        "title":"About Us",
+
+        "lslug":"about-us",
+        "description":"Explore the history of Roof Jewelers, serving Columbia, SC since 1943. On the fourth generation, we offer exceptional service, fine jewelry, and watch repair."
+    },
+    {
+        "showInNav": false,
+        "id":"store-hours",
+        "title":"Store Hours",
+
+        "lslug":"store-hours",
+        "description":"Operating Hours of Roof Jewelers Columbia, SC"
+    },
+    {
+        "showInNav": false,
+        "id":"faq",
+        "title":"FAQ",
+
+        "lslug":"faq",
+        "description":""
+    }        
+]

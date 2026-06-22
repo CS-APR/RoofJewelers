@@ -1,0 +1,176 @@
+<!DOCTYPE html> <!-- Coded by APR-->
+<html lang="en-US">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" 
+                content="width=device-width, initial-scale=1.0">
+        <meta name="description"
+                content="">
+
+        <!--looking to including meta open graph tags. they format preview on links posted to other platforms-->
+
+        <title id="page-title"></title>
+
+        <link rel="icon" type="image/png" href="Images/rj-favicon.png">
+        <link rel="stylesheet" href="styles.css">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display&display=swap">
+
+        <style>
+            #side-tab{
+                position: fixed;
+                top: 150px;
+                left: -265px;
+                width: 250px;
+                height: 400px;
+                background: white;
+                transition: left 0.5s ease;
+                z-index: 1000;
+                outline: 2px black solid;
+                padding: 5px;
+            }
+
+            #side-tab.open{
+                left: 0;
+            }
+
+            #tab-handle{
+                position: absolute;
+                transform: rotate(-90deg);
+                left: 220px;
+                top: 40px;
+                width: 100px;
+                text-align: center;
+                background: black;
+                color: white;
+                padding: 10px;
+                cursor: pointer;
+                
+            }
+
+
+            input[type=range]::-webkit-slider-thumb{
+                -webkit-appearance: none;
+                width: 15px;
+                height: 15px;
+                border-radius: 50%;
+                
+                cursor: pointer;
+                pointer-events: all;
+            }
+            input[type="range"]::-webkit-slider-runnable-track{
+                height: 2px;
+                background: transparent;
+            }
+            input[type=range]::-moz-range-thumb{
+                width: 15px;
+                height: 15px;
+                border-radius: 50%;
+            
+                cursor: pointer;
+                pointer-events: all;
+            }
+            input[type="range"]::-moz-range-track{
+                height: 2px;
+                background: transparent;
+            }
+
+            input[type="range"] {
+            -webkit-appearance: none; 
+            appearance: none;
+
+            height: 2px;
+            width: 100%;
+
+            position: absolute;
+            background: transparent;
+            pointer-events: none;
+            z-index: 1;
+            }
+            #price-slider{
+                margin-top: 10px;
+                margin-bottom: 20px;
+
+                margin: 10px;
+                position: relative;
+                height: 100px;
+                border: 2px solid transparent;
+                
+                z-index: 0;
+            }
+
+            #slider-track{
+                position: absolute;
+                top: 66px;
+                left: 15px;
+                width: 90%;
+                height: 2px;
+                background: lightgray;
+                z-index: 0;
+            }
+            #slider-range{
+                position: absolute;
+                top:-2px;
+                left: 15px;
+                height: 4px;
+                background: blue;
+                z-index: 1;
+            }
+            #minValue, #maxValue{
+                cursor: pointer;
+            }
+            input[type="text"] {
+                width: 7ch;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="mainContainer">
+            <div id="header-placeholder"></div>
+            <div id="subheader">
+                <div id="tree-bar"></div>
+
+                <h1 id="cat-name"></h1>
+                <div id="categories"></div>
+            </div> <!-- end subheader-->
+
+            <div id="content-settings"></div>
+                
+            <div id="product-content"></div>
+
+            <div id="pageBar"></div>
+          
+            <div id="footer-placeholder"></div>
+        </div><!--end main container-->
+        <div id="side-tab">
+            <div id="tab-handle">
+                Sort By
+            </div>
+            <div>
+                <div id="price-slider"></div>
+                <div id="attribute-content"></div>
+            </div>
+                
+            
+        </div>
+    </body>
+    <script src="main.js"></script> <!--loads main.js-->
+    <script>
+        (async function(){
+            await initializePage();
+            await initilalizeCatologPage();
+        })();
+
+        sideTab = document.getElementById("side-tab");
+
+        document.getElementById("tab-handle").onclick = function(event){
+            event.stopPropagation();
+            sideTab.classList.toggle("open");          
+        };
+        document.addEventListener(
+            "click", function(event){
+                if( !sideTab.contains(event.target) ) sideTab.classList.remove("open");  
+            }
+        );        
+
+    </script>
+</html>

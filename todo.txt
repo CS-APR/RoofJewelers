@@ -1,0 +1,21 @@
+________________Completed_________________________
+find a way to standardize catagory and link use from one file so that
+    no hunting for links through html pages needs to occur
+    - primarily needed in footer
+
+- set up product page
+
+- make featured items reuseable like the header and footer, shows up on home screen and product pages
+
+- fix search bar not showing searched for items when executed from a non catalog page
+
+- fix sort price range not expanding to the category max when blank search is entered
+
+___________________todo__________________________
+
+
+set up time based updating for the hours page
+
+make it so that tabbar becomes a drop down menu when screen is small
+
+make ranked search system so that closest match appears first

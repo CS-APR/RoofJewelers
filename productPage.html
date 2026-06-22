@@ -1,0 +1,163 @@
+<!DOCTYPE html> <!-- Coded by APR-->
+<html lang="en-US">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" 
+                content="width=device-width, initial-scale=1.0">
+        <meta name="description"
+                content="">
+
+        <!--looking to including meta open graph tags. they format preview on links posted to other platforms-->
+
+        <title id="page-title"></title>
+
+        <link rel="icon" type="image/png" href="Images/rj-favicon.png">
+        <link rel="stylesheet" href="styles.css">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display&display=swap">
+        <style>
+            #productContainer{
+                width:90%;
+                margin-right: auto;
+                margin-left: auto;               
+            }
+            #productInfo{
+                display: flex;
+                flex-direction: row;
+                margin-bottom: 100px;
+            }
+            #image{
+                aspect-ratio: 1/1;
+                width:500px;
+                height: 500px;
+                border: 1px black dashed;
+                align-content: center;
+            }
+            #productImg{
+                object-fit: contain;  
+                width: 100%;               
+                height: 500px;
+            }
+            #productName{
+                border-bottom: 1px black dashed;
+                padding-bottom: 5px;
+            }
+            #namePrice{
+                margin-left: 50px;
+                width: 100%;
+            }
+            #descriptionScroll{
+                max-height: 200px;
+                padding: 10px;
+                padding-top: 0px;
+                overflow-y: auto;
+                border-bottom: 2px black dotted;
+                border-top: 2px black dotted;
+            }
+            #priceDiv h3{
+                color: gray;
+            }
+            #imgBar{
+                display: flex;
+                text-align: center;
+                height: 60px;
+            }
+            #imgLibrary{
+                display: flex;
+                margin-right:auto; margin-left: auto;
+                height: 100%;
+                width: 200px;
+                overflow: hidden;                
+            }
+            #imgLibrary img{
+                width: 60px;
+                height: 60px;               
+            }
+            #imgTrack{
+                gap: 10px;
+                display: flex;
+                transition: transform 0.7s ease-in-out;
+                margin-left: auto;
+                margin-right: auto;
+            }
+            #imgTrack img{
+                cursor: pointer;
+                width: 60px;
+                height: 60px;
+
+                flex: 0 0 auto;
+
+                object-fit: contain;
+                
+            }
+            
+            .arrow{
+                cursor: pointer;
+                align-self: center;
+                border-radius: 360px;
+
+                text-align: center;
+                align-content: center;
+
+                margin: 10px;
+
+                width: 40px; height: 40px;
+                
+                background: lightgray;
+                color:whitesmoke;
+
+                font-size: 20pt;
+                user-select: none;
+            }
+            .arrow:hover{
+                background: gray;              
+            }
+        </style>
+    </head>
+    <body>
+        <div class="mainContainer">
+            <div id="header-placeholder"></div>
+            <div id="subheader">
+                <div id="tree-bar"></div>
+            </div> <!-- end subheader-->
+            <div id="productContainer">
+                <div id="productInfo">
+                    <div id="image"> 
+                        <img id="productImg" src="">
+                        <div id="imgBar"></div>
+                    </div>
+                    <div id="namePrice">
+                        <h1 id="productName"></h1>
+
+                        <h3>Description:</h3>                   
+                        <div>
+                            <p id="descriptionScroll"></p>
+                        </div>
+                        
+                        <div id="priceDiv">
+                            
+                        </div>
+                    </div>
+                </div>
+                <div id="productStatus">
+                    <h3 id="itemID"></h3>
+                    <br>
+                    <h3 id="availibility"></h3>
+                    <h3 id="quantity"></h3>
+                </div>
+            </div>
+            <div class="featured"> <!-- featured -->
+                <h2 id="featured-title"> Featured Selection </h2>
+                <div id="featured-content"></div>              
+            </div>
+
+            <div id="footer-placeholder"></div>
+        </div><!--end main container-->
+    </body>
+    <script src="main.js"></script> <!--loads main.js-->
+    <script>
+        (async function(){
+            await initializePage();
+            await initializeProductPage();
+        })();
+    </script>
+</html>

@@ -1,0 +1,198 @@
+<!DOCTYPE html> <!-- Coded by APR-->
+<html lang="en-US">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" 
+                content="width=device-width, initial-scale=1.0">
+        <meta name="description"
+                content="Serving the Columbia, SC area’s jewelry needs for over 80 years, Roof Jewelers 
+                offers a wide selection of fine jewelry, repair services and gold buying">
+
+        <!--look into to including meta open graph tags. they format preview on links posted to other platforms-->
+
+        <title>Roof Jewelers | Home</title>
+
+        <link rel="icon" type="image/png" href="Images/rj-favicon.png">
+        <link rel="stylesheet" href="styles.css">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display&display=swap">
+    </head>
+    <body>
+        <div class="mainContainer">
+            <div id="header-placeholder"></div>
+
+            <div class="slidecontainer">
+                <div class="slideshow">
+
+                    <div id="track">
+                        <section class="slide"><img src="Images/Lab-Grown-Diamonds.jpg" id="slideimg1"></section>            
+                        <section class="slide"><img src="Images/pearl-jewelry.jpg"></section>           
+                        <section class="slide"><img src="Images/Southern-Gates.webp"></section>          
+                        <section class="slide"><img src="Images/Bridal.jpg"></section>         
+                        <section class="slide"><img src="Images/Gold-Jewelry.jpg"></section>           
+                    </div>
+
+                    <img src="Images/ArrowLeft.png" alt="left arrow" id="left">
+                    <img src="Images/ArrowRight.png" alt="right arrow" id="right">
+
+                </div>
+            </div> <!-- end slidecontainer-->
+
+            <div style="margin-top: 50px; margin-left: 20%; margin-right: 20%; ">
+                <h1>Welcome to Roof Jewelers!</h1>
+                <div class="about">
+                    <p>
+                        Roof Jewelers, your local experts in fine jewelry for more than 80 years. Fine diamonds and 
+                        gemstones, gold and silver jewelry, pearls, Carolina and Clemson merchandise and more can be 
+                        found at our store, conveniently located near Fort Jackson and Wal-Mart on Forest Drive.
+                    </p>
+                    <p>
+                        We have a tremendous variety of inventory at our convenient location near Forest Acres. You 
+                        may want to pre-shop online before coming in to buy your favorites. Palmetto jewelry, bracelets, 
+                        diamond and gemstone rings and much more are available to browse by selecting the links in the 
+                        navigation and can be ordered over the phone or in person at our store. 
+                    </p>
+                </div>                
+            </div> 
+
+            <div class="ad-container"> <!-- advert images-->
+                <div class="ads">
+                    <a href="catalog.html?slug=bridal-collection"><img src="Images/BridalCollection.webp" alt="Bridal ad"></a>
+                </div>
+                <div class="ads">
+                    <a href="catalog.html?slug=necklaces-and-pendants"><img src="Images/Shop-Pendants-and-Necklaces.webp" alt="pendant ad"></a>
+                </div>
+            </div> <!-- end advert images--> 
+
+            <div class="featured"> <!-- featured -->
+                <h2 id="featured-title"> Featured Selection </h2>
+                <div id="featured-content"></div>
+                
+                
+            </div>
+
+            <div class="disclaimer">
+                <p>
+                    Notice: This website is not a complete catalog of all the products available at Roof Jewelers. Some 
+                    items available in-store may not yet be listed online. Also, we strive to keep the website's listings 
+                    as accurate as possible to our in-store inventory and prices, however, please note that listings may not 
+                    always reflect 100% accuracy.
+                </p>
+                <p>
+                    If you have any questions regarding an item you see online call us at <span data-config="store-phone"></span> 
+                    or visit us at <span data-config="store-address"></span>
+                </p>
+            </div>
+
+            <div id="footer-placeholder"></div>
+        </div> <!--end main container-->       
+        <script src="main.js"></script> <!--loads main.js-->
+        <script>
+            initializePage();
+            
+            const track = document.getElementById("track");
+
+            //create a clone of the first slide for infinite scroll effect even when slides are changed out
+            const firstSlide = document.querySelector(".slide");
+            const clone = firstSlide.cloneNode(true);
+
+            track.appendChild(clone);
+
+            const slides = document.querySelectorAll(".slide");
+
+            const nextBtn = document.getElementById("right");
+            const prevBtn = document.getElementById("left");
+
+            let index = 0;
+            const slideWidth = 100;
+
+            let autoSlide;
+
+            /* how long between slides */
+            const SLIDE_DELAY = 6000;
+
+            /* how long autoplay pauses after button click */
+            const PAUSE_AFTER_CLICK = 8000;
+
+            /* move slides */
+            function updateSlide() {
+                track.style.transition = "transform 1s ease-in-out"; /*animation*/
+                track.style.transform = `translateX(-${index * slideWidth}%)`; /*sets shift ammount*/
+            }
+
+            /* next slide */
+            function nextSlide() {
+                index++;
+                updateSlide();
+
+                /* seamless loop */
+                if(index === slides.length - 1){ /*if at the clone of the first slide turns off animation jumps to start and turns animation on again*/
+                    setTimeout(() => { /*=> is wait until finished*/
+                        track.style.transition = "none";
+                        index = 0;
+                        track.style.transform = `translateX(0%)`;
+                    }, 1000);
+                }
+            }
+
+            /* previous slide */
+            function prevSlide() {
+                if(index === 0){ /*if at first slide turns off animation jumps to clone at the end and then moves back after turning animation on*/
+                    /* jump instantly to cloned slide */
+                    track.style.transition = "none";
+
+                    index = slides.length - 1;
+
+                    track.style.transform =
+    `                   translateX(-${index * slideWidth}%)`;
+
+                    setTimeout(() => {
+                        track.style.transition =
+                            "transform 0.7s ease-in-out";
+
+                        index--;
+
+                        track.style.transform =
+                            `translateX(-${index * slideWidth}%)`;
+                    }, 20);
+                } else {
+                    index--;
+                    updateSlide();
+                }
+            }
+
+            /* autoplay controls */
+            function startAutoSlide() {
+                clearInterval(autoSlide);/*stops autoplay*/ 
+
+                autoSlide = setInterval(() => {
+                    nextSlide();
+                }, SLIDE_DELAY);
+            }
+
+            /* pause autoplay after button press */
+            function pauseAutoPlay() {
+                clearInterval(autoSlide);
+
+                setTimeout(() => {
+                    startAutoSlide();
+                }, PAUSE_AFTER_CLICK);
+            }
+
+            /* arrow buttons */
+            nextBtn.addEventListener("click", () => {
+                nextSlide();
+                pauseAutoPlay();
+            });
+
+            prevBtn.addEventListener("click", () => {
+                prevSlide();
+                pauseAutoPlay();
+            });
+
+            /* start autoplay */
+            startAutoSlide();
+
+        </script>  
+         
+    </body>
+</html>
