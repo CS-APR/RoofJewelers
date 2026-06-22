@@ -1218,7 +1218,7 @@ function applyNavigation(navigation){ //primary use footer
                             large assortment of loose diamonds and other stones you can choose from; for more information on our 
                             currently available selection stop by our showroom at <span data-config="store-address"></span> or give us a call at <span data-config="store-phone"></span>.
                         </p>
-                        <img src="Images/certified-loose-diamonds-header.jpg" alt="" id="loose-stones-flyer">
+                        <img src="images/certified-loose-diamonds-header.jpg" alt="" id="loose-stones-flyer">
                     </div>
             `;      
         }
@@ -1280,9 +1280,9 @@ function applyNavigation(navigation){ //primary use footer
                             To view a full catalog of available styles and designs stop by our showroom at 
                             <span data-config="store-address"></span>, <span data-config="store-city-state"></span>.                       
                         </p>
-                        <img src="Images/classringsrev.jpg" alt="">
-                        <img src="Images/classrings_001rev.jpg" alt="">
-                        <img src="Images/classrings_002rev.jpg" alt="">
+                        <img src="images/classringsrev.jpg" alt="">
+                        <img src="images/classrings_001rev.jpg" alt="">
+                        <img src="images/classrings_002rev.jpg" alt="">
                     </div>
             `;
             
