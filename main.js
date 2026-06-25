@@ -157,7 +157,6 @@ function runSearch(){ //main function to search through inventory
     var category = findByProperty(navigation, "slug", slug);
     var catName = document.getElementById("cat-name");
 
-
     if(!slug){
         window.location.href =
             "catalog.html?slug=showroom&search=" +
@@ -210,31 +209,51 @@ function getSearchPrompt(){
 }
 
 function searchItem(prompt){ 
+    const lowerPrompt = prompt.toLowerCase();
     const searchPool = catInventory.length > 0 ? catInventory : inventory; 
-    const terms = prompt.toLowerCase().split(" ");
+    const terms = lowerPrompt.split(" ");
 
     for (const item of searchPool) {
         const itemNum = item["Item#"].toLowerCase();
-        if (itemNum.includes(terms)) searchResults.push(item);
+        if (itemNum.includes(lowerPrompt)) searchResults.push(item);
     }
-
+    const rankedResults = [];
     for (const item of searchPool) { 
-        const itemName = item["Product Name"].toLowerCase(); 
-        if (item["Description"] !== null) {var itemDesc = item["Description"].toLowerCase();}
-        else var itemDesc = "";
+        const itemName = (item["Product Name"] || "").toLowerCase(); 
+        const itemDesc = (item["Description"] || "").toLowerCase();
+
+        var score = 0;
+        const itemWords = itemName.split(/\s+/);
         
         var matches = terms.every(term => { 
             var singular = term;
+            
             if (term.endsWith("ies")) singular = term.slice(0, -3) + "y"; 
             else if (term.endsWith("es")) singular = term.slice(0, -2);
             else if (term.endsWith("s")) singular = term.slice(0,-1); 
+            if (term == "carat") term = "ct";
+            if (term == "karat") term = "k";
             
-            return ( itemName.includes(term) || 
+            const found = ( itemName.includes(term) || 
             itemName.includes(singular) || 
             itemDesc.includes(term) || 
             itemDesc.includes(singular) ); 
+
+            if(found){
+                if (itemWords.includes(term)) score += 1000; 
+                if (itemName.includes(lowerPrompt)) score += 90;
+                if (itemName.includes(term) ) score += 80;
+                if (itemName.includes(singular) ) score += 60;
+                if (itemDesc.includes(term) ) score += 40;
+                if (itemDesc.includes(singular) ) score += 20;
+            }
+
+            return found;
         }) 
-        if(matches) searchResults.push(item); 
+        if(matches) rankedResults.push({item, score}); 
+
+        rankedResults.sort( (a,b) => b.score - a.score );
+        searchResults = rankedResults.map( result => result.item);
     } 
     rebuildActiveInventory(); 
 }
@@ -756,86 +775,197 @@ function getCurrentInventory(){
 
         pageBar.innerHTML = "";
 
-        if (pageCount <= 1) return;
+        const screenWidth = window.innerWidth;
+        console.log(screenWidth);
 
-        var html = "";
+        if (screenWidth <= 800) {//small screen page bar display
+            console.log("phone screen");
+            const maxPageView = 3;
+            const edgePages = 1;
+            const middlePages = 1;
+            if (pageCount <= 1) return; //if one page don't make page bar
 
-        if (pageCount > 1){           
-            //fist two page buttons
-            html += `
-                <div id="prev">< Prev</div>
-            `;
-            if (pageCount <= 7) {
-                for (var i = 1; i <= pageCount; i++){
+            var html = "";
+
+            if (pageCount > 1){           
+                //fist page button
+                html += `
+                    <div id="prev">< Prev</div>
+                `;
+                if (pageCount <= maxPageView) {
+                    for (var i = 1; i <= pageCount; i++){
+                        html += `
+                            <div class="pageNumbers ${i === currentPage ? "currentPage" : ""}">
+                                ${i}
+                            </div>
+                        `;
+                    }
+                } else {
                     html += `
-                        <div class="pageNumbers ${i === currentPage ? "currentPage" : ""}">
-                            ${i}
+                        <div class="pageNumbers ${1 === currentPage ? "currentPage" : ""}">
+                            ${1}
+                        </div>
+                    `
+                }
+            
+
+                if (pageCount > maxPageView){
+                    var startMiddle, endMiddle;
+
+                    /* near beginning */
+                    if(currentPage <= edgePages + 1){
+                        startMiddle = edgePages + 1;
+                        endMiddle = edgePages + middlePages;
+                    }
+
+                    /* near end */
+                    else if(currentPage >= pageCount - edgePages){
+                        startMiddle = pageCount - middlePages - edgePages + 1;
+                        endMiddle = pageCount - edgePages;
+                    }
+
+                    /* middle */
+                    else{
+                        const half = Math.floor(middlePages / 2);
+                        startMiddle = currentPage - half;
+                        endMiddle = startMiddle + middlePages - 1;
+
+                        if (startMiddle < edgePages + 1){
+                            startMiddle = edgePages + 1;
+                            endMiddle = startMiddle + middlePages - 1;
+                        }
+                        if (endMiddle > pageCount - edgePages){
+                            endMiddle = pageCount - edgePages;
+                            startMiddle = endMiddle - middlePages + 1;
+                        }
+                    }
+
+                    //elipse once deep enough into pages
+                    if (startMiddle > edgePages + 1){
+                        html += ` <div>...</div> `;
+                    }
+                    //sliding middle
+                    for (var j = startMiddle; j <= endMiddle; j++){
+                        html += `
+                            <div class="pageNumbers ${j === currentPage ? "currentPage" : ""}">
+                                ${j}
+                            </div>
+                        `;
+                    }
+                    //elispse when not too deep
+                    if (endMiddle < pageCount - edgePages) {
+                        html += ` <div>...</div> `;
+                    }
+                    //last two
+                    html += `
+                        <div class="pageNumbers ${pageCount === currentPage ? "currentPage" : ""}">
+                            ${pageCount}
                         </div>
                     `;
                 }
-            } else {
-                html += `
-                    <div class="pageNumbers ${1 === currentPage ? "currentPage" : ""}">
-                        ${1}
-                    </div>
-                    <div class="pageNumbers ${2 === currentPage ? "currentPage" : ""}">
-                        ${2}
-                    </div>
-                `;
+
+                //next button
+                html += ` <div id="next">Next ></div> `;
+                document.getElementById("pageBar").innerHTML = html;
             }
-        
+        }
+        else { //page par on large screens
+            console.log("wide screen");
+            const maxPageView = 7;
+            const edgePages = 2;
+            const middlePages = maxPageView - edgePages;
 
-            if (pageCount > 7){
-                var startMiddle, endMiddle;
+            if (pageCount <= 1) return;
 
-                /* near beginning */
-                if(currentPage <= 3){
-                    startMiddle = 3;
-                    endMiddle = 7;
-                }
+            var html = "";
 
-                /* near end */
-                else if(currentPage >= pageCount - 2){
-                    startMiddle = pageCount - 6;
-                    endMiddle = pageCount - 2;
-                }
-
-                /* middle */
-                else{
-                    startMiddle = Math.max(currentPage - 2, 3);
-                    endMiddle = Math.min(currentPage + 2, pageCount - 2);
-                }
-
-                //elipse once deep enough into pages
-                if (startMiddle > 3){
-                    html += ` <div>...</div> `;
-                }
-                //sliding middle
-                for (var j = startMiddle; j <= endMiddle; j++){
+            if (pageCount > 1){           
+                //fist two page buttons
+                html += `
+                    <div id="prev">< Prev</div>
+                `;
+                if (pageCount <= maxPageView) {
+                    for (var i = 1; i <= pageCount; i++){
+                        html += `
+                            <div class="pageNumbers ${i === currentPage ? "currentPage" : ""}">
+                                ${i}
+                            </div>
+                        `;
+                    }
+                } else {
                     html += `
-                        <div class="pageNumbers ${j === currentPage ? "currentPage" : ""}">
-                            ${j}
+                        <div class="pageNumbers ${1 === currentPage ? "currentPage" : ""}">
+                            ${1}
+                        </div>
+                        <div class="pageNumbers ${2 === currentPage ? "currentPage" : ""}">
+                            ${2}
                         </div>
                     `;
                 }
-                //elispse when not too deep
-                if (endMiddle < pageCount - 2) {
-                    html += ` <div>...</div> `;
-                }
-                //last two
-                html += `
-                    <div class="pageNumbers ${pageCount-1 === currentPage ? "currentPage" : ""}">
-                        ${pageCount-1}
-                    </div>
-                    <div class="pageNumbers ${pageCount === currentPage ? "currentPage" : ""}">
-                        ${pageCount}
-                    </div>
-                `;
-            }
+            
 
-            //next button
-            html += ` <div id="next">Next ></div> `;
-            document.getElementById("pageBar").innerHTML = html;
+                if (pageCount > maxPageView){
+                    var startMiddle, endMiddle;
+
+                    /* near beginning */
+                    if(currentPage <= edgePages + 1){
+                        startMiddle = edgePages + 1;
+                        endMiddle = edgePages + middlePages;
+                    }
+
+                    /* near end */
+                    else if(currentPage >= pageCount - edgePages){
+                        startMiddle = pageCount - middlePages - edgePages + 1;
+                        endMiddle = pageCount - edgePages;
+                    }
+
+                    /* middle */
+                    else{
+                        const half = Math.floor(middlePages / 2);
+                        startMiddle = currentPage - half;
+                        endMiddle = startMiddle + middlePages - 1;
+
+                        if (startMiddle < edgePages + 1){
+                            startMiddle = edgePages + 1;
+                            endMiddle = startMiddle + middlePages - 1;
+                        }
+                        if (endMiddle > pageCount - edgePages){
+                            endMiddle = pageCount - edgePages;
+                            startMiddle = endMiddle - middlePages + 1;
+                        }
+                    }
+
+                    //elipse once deep enough into pages
+                    if (startMiddle > edgePages + 1){
+                        html += ` <div>...</div> `;
+                    }
+                    //sliding middle
+                    for (var j = startMiddle; j <= endMiddle; j++){
+                        html += `
+                            <div class="pageNumbers ${j === currentPage ? "currentPage" : ""}">
+                                ${j}
+                            </div>
+                        `;
+                    }
+                    //elispse when not too deep
+                    if (endMiddle < pageCount - edgePages) {
+                        html += ` <div>...</div> `;
+                    }
+                    //last two
+                    html += `
+                        <div class="pageNumbers ${pageCount-1 === currentPage ? "currentPage" : ""}">
+                            ${pageCount-1}
+                        </div>
+                        <div class="pageNumbers ${pageCount === currentPage ? "currentPage" : ""}">
+                            ${pageCount}
+                        </div>
+                    `;
+                }
+
+                //next button
+                html += ` <div id="next">Next ></div> `;
+                document.getElementById("pageBar").innerHTML = html;
+            }
 
         }
     }
