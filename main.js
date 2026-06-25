@@ -1202,6 +1202,33 @@ function applyNavigation(navigation){ //primary use footer
         await applyConfig();
         await applyNavigation(navigation);
 
+        document.querySelectorAll(".tabitem").forEach(tab => { //menudrop down direction
+            tab.addEventListener("mouseenter", function(){
+                const dropdown = this.querySelector(".dropdown");
+
+                if(!dropdown) return;
+
+                dropdown.classList.remove("left");
+
+                const rect = dropdown.getBoundingClientRect();
+
+                if(rect.right > window.innerWidth) dropdown.classList.add("left");
+            });
+
+        });
+        document.querySelectorAll(".dropdownitem").forEach(item => { //submenu dropdown dirrection
+            item.addEventListener("mouseenter", function(){
+                const sub = this.querySelector(".subdropdown");
+
+                if(!sub) return;
+
+                sub.classList.remove("left");
+
+                if(sub.getBoundingClientRect().right > window.innerWidth) sub.classList.add("left");
+            });
+
+        });
+
         const searchBar = document.getElementById("searchBar");
         var firstFocus = true;
         searchBar.addEventListener(

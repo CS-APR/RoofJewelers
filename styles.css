@@ -60,7 +60,9 @@ p{
         #header-info{
             grid-area: 2,1;
             text-align: center;
+            display: block;
         }
+        
 
     /*Tabbar formating*/
         .tabbar{
@@ -166,13 +168,17 @@ p{
             display: none;
             position:absolute;
             top:100%;
-            right:0;
+            left:0;
 
             background-color: white;
             border: 1px black solid;
 
             min-width: 150px;
             z-index: 1000; /*forces it above other screen items*/
+        }
+        .dropdown.left{
+            left: auto;
+            right: 0;
         }
         .dropdown a, .subdropdown a{
             display: block;
@@ -201,6 +207,10 @@ p{
             
             min-width: 150px;
             z-index: 1001; /*forces it above other screen items*/
+        }
+        .subdropdown.left{
+            left: auto;
+            right: 100%;
         }
 
     /*end tabbar formating*/
