@@ -61,6 +61,7 @@ p{
             grid-area: 2,1;
             text-align: center;
             display: block;
+            margin: 5px;
         }
         
 
