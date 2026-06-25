@@ -464,6 +464,7 @@ function getCurrentInventory(){
     let pendingPage = null;
     var MaxSortPrice = 0;
     let resetPage = false;
+    let initializeSlider = false;
 
     async function loadInventory(){ //loads the inventory file
         const response = await fetch("inventory/inventory.json");
@@ -570,18 +571,19 @@ function getCurrentInventory(){
         const maxValue = document.getElementById("maxValue");
 
         const sliderRange = document.getElementById("slider-range");
-        if( parseInt(minSlider.value) > parseInt(maxSlider.value) ) {
-            minSlider.value = maxSlider.value;
+
+        const min = parseInt(minSlider.value);
+        const max = parseInt(maxSlider.value);
+
+        if( parseInt(minSlider.value) > parseInt(maxSlider.value) ) minSlider.value = maxSlider.value;
+        
+        if (!initializeSlider){
+            sessionStorage.setItem("minPrice", min);
+            sessionStorage.setItem("maxPrice", max);
         }
-            
+        
             minValue.textContent = minSlider.value;
             maxValue.textContent = maxSlider.value;
-
-            const min = parseInt(minSlider.value);
-            const max = parseInt(maxSlider.value);
-
-        sessionStorage.setItem("minPrice", min);
-        sessionStorage.setItem("maxPrice", max);
 
             getSortedInventory(min, max, resetPage);
             updateValues(activeInventory);
@@ -1223,6 +1225,12 @@ function applyNavigation(navigation){ //primary use footer
 
         await initializeSearch();
 
+        const path = window.location.pathname;
+        if (path.endsWith("index.html") || path === "/") {
+            sessionStorage.removeItem("minPrice");
+            sessionStorage.removeItem("maxPrice");
+        }
+
         document.body.style.opacity = "1"; /* allows fade into website */
     }
     /* load info pages */
@@ -1623,7 +1631,9 @@ function applyNavigation(navigation){ //primary use footer
 
         resetPage = false;
 
+        initializeSlider = true;
         updatePriceRange();
+        initializeSlider = false;
 
         minValue.onclick = function(){
             minValue.hidden = true;
