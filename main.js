@@ -778,7 +778,7 @@ function getCurrentInventory(){
         const screenWidth = window.innerWidth;
         console.log(screenWidth);
 
-        if (screenWidth <= 800) {//small screen page bar display
+        if (screenWidth <= 500) {//small screen page bar display
             console.log("phone screen");
             const maxPageView = 3;
             const edgePages = 1;
@@ -1055,7 +1055,7 @@ function renderProductPage(product){
     var imageHtml = "";
     for (const image of images){ //makes the html for the thumbnail images
         imageHtml += `
-            <img class="pImg" src="inventory/inventory-images/${image}">
+            <img class="pImg" src="inventory/inventory-images/${image}" onerror="this.src='images/img-placeholder.svg'">
         `;
     }
 
