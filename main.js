@@ -8,13 +8,34 @@
 
         document.getElementById(id).innerHTML = data;
     }
-    //link building helper
-    function buildlink(item){
-        if(item.lslug) return `infoPage.html?lslug=${item.lslug}`;
-        if(item.slug) return `catalog.html?slug=${item.slug}`;
-        if(item.link) return item.link;
 
+    async function loadJSON(file){
+        const response = await fetch(file);
+        return await response.json();
+    }
+    async function generateJson(){
+        navigation = await loadJSON("navigation.json");
+        inventory = await loadJSON("inventory/inventory.json"); //all inventory
+        CONFIG = await loadJSON("config.json");
+        imageManifest = await loadJSON("inventory/imageManifest.json");
+    }
+
+    //link building helper
+    function buildLink(item, includePage = false){
+        if(item.lslug) return `infoPage.html?lslug=${item.lslug}`;
+        if(item.slug){
+            let url = `catalog.html?slug=${item.slug}`;
+
+            if(includePage && item.slug === categorySlug && currentCatalogPage != null) 
+                url += `&page=${currentCatalogPage}`;
+            return url;
+        }
+        if(item.link) return item.link;
         return "#";
+    }
+
+    function getParams(){
+        return new URLSearchParams(window.location.search);
     }
 
 //rule to open outside links in a new tab and not track where the user came from
@@ -22,13 +43,12 @@ function setupExternalLinks(){
     const links = document.querySelectorAll("a");
 
     links.forEach(link => {
-
         const href = link.getAttribute("href");
 
-        /* skip empty links */
+        // skip empty links
         if(!href) return;
 
-        /* external link */
+        // external link
         if(
             href.startsWith("http") &&
             !href.includes(window.location.hostname)
@@ -41,76 +61,44 @@ function setupExternalLinks(){
 
 //functions for the navigation bar
     /*function to load navigation bar */
-    var navigation;
-    async function loadNavigation(){
-        const response = await fetch("navigation.json");
-        navigation = await response.json();
-    }
-    function createMenu(items){
+    function createMenu(items, topLevel = true){
         var html = "";
         items.forEach(item => {
             /*item has dropdown*/
             if (item.showInNav === false) return;
 
-            else if(item.children){
-                html += `
-                    <div class="tabitem">
-                        <a href="${buildlink(item)}"> ${item.title}</a>
+            const itemClass = topLevel ? "tabitem" : "dropdownitem";
+            const dropdownClass = topLevel ? "dropdown" : "subdropdown";
 
-                        <div class="dropdown">
-                            ${createSubMenu(item.children)}
-                        </div>
+            if(item.children){
+                html += `
+                    <div class="${itemClass}">
+                        <a href="${buildLink(item)}"> ${item.title}</a>
+
+                        <div class="${dropdownClass}"> ${createMenu(item.children, false)} </div>
                     </div>                
                 `;
             }
             /* no children link */
             else {
-                html += `
-                    <div class="tabitem">
-                        <a href="${buildlink(item)}">${item.title}</a>                
-                    </div>
-                `;
+                if(topLevel) html += `<div class="${itemClass}"> <a href="${buildLink(item)}"> ${item.title} </a> </div>`;
+                else html += `<a href="${buildLink(item)}">${item.title}</a>`;              
             }        
         });
-        html += `
-            <div class="tabitem">
-                <div id="search"> 
-                    <span> &#8981 </span> 
-                    
-                    <div id="searchBox">
-                        <div> <input type="text" placeholder="Search" id="searchBar" value=""> </div>
-                        <div id="execute"> Go </div>
-                    </div>
-                </div>             
-            </div>
-        `;
-
-        return html;
-    }
-    function createSubMenu(items){
-        var html = "";
-        items.forEach(item => {
-            if (item.showInNav === false) return;
-
-            /*item has dropdown*/
-            else if(item.children){
-                html += `
-                    <div class="dropdownitem">
-                        <a href="${buildlink(item)}"> ${item.title}</a>
-
-                        <div class="subdropdown">
-                            ${createSubMenu(item.children)}
+        if (topLevel){
+            html += `
+                <div class="tabitem">
+                    <div id="search"> 
+                        <span> &#8981 </span> 
+                        
+                        <div id="searchBox">
+                            <div> <input type="text" placeholder="Search" id="searchBar"> </div>
+                            <div id="execute"> Go </div>
                         </div>
-                    </div>
-                `;
-            }
-            /* no children link */
-            else {
-                html += `               
-                    <a href="${buildlink(item)}">${item.title}</a> 
-                `;
-            }        
-        });
+                    </div>             
+                </div>
+            `;
+        }
 
         return html;
     }
@@ -151,7 +139,7 @@ function initializeSearch(){
 }
 
 function runSearch(){ //main function to search through inventory
-    const params = new URLSearchParams(window.location.search);
+    const params = getParams();
     const slug = params.get("slug");
 
     var category = findByProperty(navigation, "slug", slug);
@@ -202,7 +190,6 @@ function runSearch(){ //main function to search through inventory
     updatePriceRange();
 
     catName.textContent = category.title + " search results for: \"" + prompt + "\"";
-
 }
 function getSearchPrompt(){
     return document.getElementById("searchBar").value;
@@ -264,9 +251,8 @@ function rebuildActiveInventory(){
     } else if(searchResults !== null){
         activeInventory = searchResults;
     } else {
-        activeInventory = catInventory.length > 0
-            ? catInventory
-            : inventory;
+        const isCatalogPage = getParams().has("slug");
+        activeInventory = isCatalogPage ? catInventory : inventory;
     }
 
     updateValues(activeInventory);
@@ -274,22 +260,15 @@ function rebuildActiveInventory(){
 }
 
 function getCurrentInventory(){
-    if(searchResults !== null){
-        return searchResults;
-    }
-    return catInventory.length > 0
-        ? catInventory
-        : inventory;
+    if(searchResults !== null) return searchResults;
+
+    const isCatalogPage = getParams().has("slug");
+    if (isCatalogPage) return catInventory;
+
+    return inventory;
 }
 
-
 //functions for the use of config.json file
-    let CONFIG = {}
-    async function loadconfig(){
-        const response = await fetch("config.json");
-
-        CONFIG = await response.json();
-    }
     function applyConfig(){
         const elements = document.querySelectorAll("[data-config]");
 
@@ -324,8 +303,10 @@ function getCurrentInventory(){
     }
 
 // render page functions
-    function renderCatalogPage(category){
+    function renderCatalogPage(category){//loads category page subheader
         document.getElementById("cat-name").textContent = category.title;
+        loadCategoryDescription(category);
+
         document.getElementById("page-title").textContent = "Roof Jewelers | " + category.title;
         document.querySelector('meta[name="description"]').content = category.description;
     }
@@ -338,88 +319,60 @@ function getCurrentInventory(){
     //functions for treepath
     function trackCategoryPath(items, slug, path = []){
         for (const item of items) {
-
             const newpath = [...path,item];
 
             if (item.slug === slug) return newpath;
 
             if (item.children && item.children.length > 0) {
                 const result = trackCategoryPath(item.children, slug, newpath);
-
                 if (result) return result;
             }
         }
-
         return null;
     }
-    function buildPathLink(item){
-        console.log(categorySlug);
-        console.log(item.slug);
-        if(item.lslug) return `infoPage.html?lslug=${item.lslug}`;
-        if(item.slug === categorySlug) return `catalog.html?slug=${item.slug}&page=${currentCatalogPage}`;
-        else return `catalog.html?slug=${item.slug}`;
-        if(item.link) return item.link;
-        return "#";
-    }
     function renderCategoryPath(path){ //builds tree bar for category page
-        const params = new URLSearchParams(window.location.search);
-        const treebar = document.getElementById("tree-bar");
+        const isProductPage = getParams().has("item");
 
-        var html = `
-            <a href="index.html">Home</a>
-        `;
+        var html = ` <a href="index.html">Home</a> `;
 
         path.forEach((item, index) => {
             const islast = index === path.length - 1;
 
-            if(!params.get("item")){
-                if(islast){
-                    html += `
-                        &nbsp;>&nbsp;
-                        
-                        <strong>${item.title}</strong>
-                    `;
-                } else {                 
-                    html += `
-                        &nbsp;>&nbsp;
-                    `;
+            html += `&nbsp;>&nbsp;`;
 
-                    var href = buildPathLink(item);
-                    if (href) {
-                        html += `
-                            <a href="${href}">${item.title}</a> 
-                        `;
-                    } else {
-                        html += `
-                            ${item.title}
-                        `;
-                    }          
-                }
-            } else {         
-                html += `
-                    &nbsp;>&nbsp;
-                `;
-
-                var href = buildPathLink(item);
-                if (href) {
-                    html += `
-                        <a href="${href}">${item.title}</a> 
-                    `;
-                } else {
-                    html += `
-                        ${item.title}
-                    `;
-                }                         
+            if (!isProductPage && islast) {
+                html+= `<strong>${item.title}</strong>`;
+                return;
             }
-        })//end foreach
 
-        if (params.get("item")){
-            html += `
-                &nbsp;>
-            `;
-        }
+            const href = buildLink(item, true);
 
-        treebar.innerHTML = html;
+            html += href ? `<a href="${href}">${item.title}</a>` : `${item.title}`;
+        });
+
+        if (isProductPage) html += "&nbsp;>";
+
+        document.getElementById("tree-bar").innerHTML = html;       
+    }
+
+    const categoryDescription = {//array storing the desriptions for categories
+            "engagement-rings": `
+                Starting a new life with your true love can be exciting and wonderful! That journey begins with the perfect proposal. A diamond engagement ring is the symbol of your love that's given to last a lifetime. Let us help you select the perfect engagement ring to begin your journey!
+            
+                Roof Jewelers has bridal sets, single solitaires, semi-mounts, and more! We can even design a custom ring based on your ideas. 
+            `,
+            "estate": `
+                Love the styles of days gone by? At Roof Jewelers we have a wide selection of estate and vintage jewelry; to see these beautiful pieces for yourself drop by our showroom. We have an entire vault of estate jewelry and inventory changes frequently, so a much larger selection may be found in-store than can be made available online.
+
+                You know the saying, "They don't make things like they used to." This is your chance to get the highest quality fine jewelry that you can't find anywhere else.      
+            `,
+            "citizen": `All Citizen Watches come with a five year movement warranty.`,
+            "thorsten-rings": `Thorsten Rings is a cutting-edge brand specializing in bands crafted from durable ceramics and alternative metals, with many unique styles and inlays, come find the piece that speaks to you.
+`
+    }
+    function loadCategoryDescription(category){
+        const description = document.getElementById("cat-description");
+        description.innerText = categoryDescription[category.slug] || "";
     }
 
     //functions for category boxes
@@ -432,7 +385,7 @@ function getCurrentInventory(){
             const children = category.children;
 
             for (const child of children) {
-                var href = buildlink(child);
+                var href = buildLink(child);
                 if (href){
                     html += `
                         <div><a href="${href}">${child.title}</a></div>
@@ -444,8 +397,13 @@ function getCurrentInventory(){
             return html;
         }    
     }
+
 //catalog page inventory display functions
-    let inventory = []; //all inventory
+    let navigation;
+    let inventory;
+    let CONFIG;
+    let imageManifest;
+    
     let catInventory = []; //category specific inventory
     let visibleProducts = []; //products vissible to user when on catalog page
     let featuredInventory = []; //featured items
@@ -455,63 +413,59 @@ function getCurrentInventory(){
     let currentPage = 1;
     let currentCatalogPage = null;
     let categorySlug = null;
-    const base = 12;
+    const base = 12; //catalog default display count
     let displayCount = base;
     let start = 0;
     let end = 0;
     let pageCount = 0;//change inventory to category inventory when made
     let isRendering = false;
     let pendingPage = null;
-    var MaxSortPrice = 0;
+    let MaxSortPrice = 0;
     let resetPage = false;
     let initializeSlider = false;
 
-    async function loadInventory(){ //loads the inventory file
-        const response = await fetch("inventory/inventory.json");
-        inventory = await response.json();
-    }
-
+//******* functions to get the catalog/featured inventory ********/
     async function getCategoryInventory(){ //gets the items specific to the category
         catInventory = [];
 
-        await loadNavigation();
-
-        const params = new URLSearchParams(window.location.search);
-
+        const params = getParams();
         const slug = params.get("slug");
 
         const category = findByProperty(navigation, "slug", slug);
 
-        if(!category) window.location.href = "404page.html";
+        if(!category) {
+            window.location.href = "404page.html";
+            return;
+        }
 
         if(category){
-            for (const item of inventory){                
+            for (const item of inventory){              
                 if(item.Category === category.id && item.Show === 0) catInventory.push(item);
                 else if (item.Brand === category.id) catInventory.push(item);
             }
         }
+        
         searchCategoryInventory(category.children);
         activeInventory = catInventory;
     }
     function searchCategoryInventory(category){//recursive function to load category inventory to include items in children
-        if (category){
-            for(const child of category) {
-                for (const item of inventory){
-                    if(item.Category === child.id) catInventory.push(item);
-                }
-                searchCategoryInventory(child.children);
+        if (!category) return;
+        for(const child of category) {
+            for (const item of inventory){
+                if(item.Category === child.id) catInventory.push(item);
             }
-        }
+            searchCategoryInventory(child.children);
+        } 
     }
     async function getFeaturedInventory(){//gets the items in inventory marked as featured
-        await loadInventory();
         for (const item of inventory){
             if (item["Featured"] === 1) featuredInventory.push(item);
         }
     }
-    
+//******* end of functions to get the catalog/featured inventory ********/
+
 //functions for the use of the attribute side bar
-    function getMaxPrice(inventoryArray){
+    function getMaxPrice(inventoryArray){ //get the highest price from items in inventory
         MaxSortPrice = 0;
         for (const item of inventoryArray){
             const price = parseFloat(item.Price) || 0;
@@ -560,7 +514,7 @@ function getCurrentInventory(){
             </p>
         `;     
     }
-    function updatePriceRange(){ //controls the blue oberlay bar of the slider
+    function updatePriceRange(){ //controls the blue overlay bar of the slider
         const minSlider = document.getElementById("minPrice");
 
         if (!minSlider) return;
@@ -598,8 +552,40 @@ function getCurrentInventory(){
             sliderRange.style.width = (percentMax - percentMin) + "%";
         resetPage = false;
     }
+
+    function setUpSliderInput(value, input, slider){
+        value.onclick = function(){
+            value.hidden = true;
+            input.hidden = false;
+            input.focus();
+        }
+
+        input.onblur = function(){
+            value.textContent = this.value;
+            slider.value = this.value;
+            input.hidden = true;
+            value.hidden = false;
+            resetPage = true;
+            updatePriceRange();
+        }
+        input.onfocus = function(){
+            this.select();
+        }
+        input.onkeydown = function(event){
+            if(event.key === "Enter"){
+                this.blur();
+            }
+        }
+    }
+    function setUpSlider(slider){
+        slider.oninput = function(){
+            resetPage = true;
+            updatePriceRange();
+        }
+    }
 //end of attribute side bar specific functions
 
+//******** catalog page functions *********/
     function updateValues(inventoryArray){ //products vissible in a category
         if(currentCatalogPage != null){
             currentPage = currentCatalogPage;
@@ -642,7 +628,6 @@ function getCurrentInventory(){
     }
 
     async function initilalizeCatolog(){ //runs functions for the catolog page
-        await loadInventory(); //gets inventory
         await getCategoryInventory(); //gets category specific inventory
         rebuildActiveInventory(); //sets active inventory
         attachListeners(); //attches listners to pagebar and display count
@@ -650,9 +635,10 @@ function getCurrentInventory(){
 
     //render functions
     function renderSettings(inventoryArray){ //sort bar, product count, display option count
+        if (inventoryArray.length > 0) start+=1;
         var html = `
             <div id="productCount">
-                <p><strong>Products</strong> ${start +1}-${Math.min(end, inventoryArray.length)} of <strong>${inventoryArray.length}</strong></p> 
+                <p><strong>Products</strong> ${start}-${Math.min(end, inventoryArray.length)} of <strong>${inventoryArray.length}</strong></p> 
             </div>
             <div class="dropdown-container">
                 <p>Show: </p>
@@ -667,310 +653,141 @@ function getCurrentInventory(){
         
         document.getElementById("content-settings").innerHTML = html;
     }
-    function renderProducts(){ //pulls product img, name and price to a card for display
-        var price = 0;
+
+    function renderProductCards(products, containerId, featured = false){ //pulls product img, name and price to a card for display
+        //var price = 0;
         var html = "";
 
         //fade content out
-        const container = document.getElementById("product-content");
+        const container = document.getElementById(containerId);
+        if (!container) return;
         container.style.opacity = "0";
-        
-        //fade timer
-        setTimeout(async () => {
-            /* generate/render html */
-            container.innerHTML = html;
-            container.style.opacity = "1";
-        }, 150);
 
-        for (const object of visibleProducts) {//load product cards to page
-            if (object.Price != 0) price = parseFloat(object.Price);
-            else if (object.Retail != 0) price = parseFloat(object.Retail);
-            else price = "Price Not Available";
+        const params = getParams();
+        const slug = params.get("slug");
 
-            if (typeof(price) !== "string" ) {
-                if (object.Brand === "brands-citizen") { //watch discount
-                    price = object.Retail - (object.Retail*.25);
-                }
-                var moneyFormat = new Intl.NumberFormat('en-US', {style: 'currency',currency: 'USD'}).format(price);
-            } else
-                var moneyFormat = price;
+        for (const item of products){
+            let price = item.Price;
+            if (price == 0) price = item.Retail;
 
-            var imagePath = "inventory/inventory-images/" + object["Product Image"];
+            if (price == 0) price = "Price Not Available";
+            else {
+                if (item.Brand === "brands-citizen") price = item.Retail * 0.75;
+                price = moneyFormat(price);
+            }
 
-            const params = new URLSearchParams(window.location.search);
-
-            const slug = params.get("slug");
-            
+            const href = featured
+                ? `productPage.html?item=${item["Item#"]}&category=${item["Category"]}`
+                : `productPage.html?item=${item["Item#"]}&category=${slug}&page=${currentPage}`;
 
             html += `
                 <div class="item-card">
                     <div class="item-card1">
-                        <a href="productPage.html?item=${object["Item#"]}&category=${slug}&page=${currentPage}"">
-                            <img src="${imagePath}" onerror="this.src='images/img-placeholder.svg'">
+                        <a href="${href}">
+                            <img src="inventory/inventory-images/${item["Product Image"]}" 
+                                onerror="this.src='images/img-placeholder.svg'">
                         </a>
                     </div>
                     <div class="item-card2">
-                        ${object["Product Name"]} <br>
-                        <span class="price">${moneyFormat}</span>
+                        ${item["Product Name"]} <br>
+                        <span class="price">${price}</span>
                     </div>
-                </div>
+                </div>           
             `;
-        };
-    }
-    function renderFeaturedProducts(){//pulls product img, name and price to a card for display
-        var price = 0;
-        var html = "";
-
-        //fade content out
-        const container = document.getElementById("featured-content");
-
-        if (container !== null){
-            container.style.opacity = "0";
-            
-            //fade timer
-            setTimeout(async () => {
-                /* generate/render html */
-                container.innerHTML = html;
-                container.style.opacity = "1";
-            }, 150);
-
-            for (const object of featuredInventory) {//load product cards to page
-
-                if (object.Price != 0) price = object.Price;
-                else if (object.Retail != 0) price = object.Retail;
-                else price = "Price Not Available";
-
-                if (price !== "Price Not Available" )
-                    var moneyFormat = new Intl.NumberFormat('en-US', {style: 'currency',currency: 'USD'}).format(price);
-                else
-                    var moneyFormat = price;
-
-                var imagePath = "inventory/inventory-images/"+object["Product Image"];
-
-                const params = new URLSearchParams(window.location.search);
-
-                const slug = params.get("slug");
-                
-
-                html += `
-                    <div class="item-card">
-                        <div class="item-card1">
-                            <a href="productPage.html?item=${object["Item#"]}&category=${object["Category"]}">
-                                <img src="${imagePath}" onerror="this.src='images/img-placeholder.svg'">
-                            </a>
-                        </div>
-                        <div class="item-card2">
-                            ${object["Product Name"]} <br>
-                            <span class="price">${moneyFormat}</span>
-                        </div>
-                    </div>
-                `;
-            };
-
-            document.getElementById("featured-content").innerHTML = html;
         }
+
+        setTimeout(() => {//fade timer
+            container.innerHTML = html;
+            container.style.opacity = "1";
+        },150);
+    }
+    function renderProducts(){
+        renderProductCards(visibleProducts, "product-content");
+    }
+    function renderFeaturedProducts(){
+        renderProductCards(featuredInventory, "featured-content", true);
     }
 
-
+    //page bar helper
+    function getPageNumberButton(page){
+        return `
+            <div class="pageNumbers ${page === currentPage ? "currentPage" : ""}">
+                ${page}
+            </div>
+        `;
+    }
     function renderPageBar(){// page navigation for categories
-        var pageBar = document.getElementById("pageBar");
+        const pageBar = document.getElementById("pageBar");
 
         pageBar.innerHTML = "";
 
-        const screenWidth = window.innerWidth;
-        console.log(screenWidth);
+        const mobile = window.innerWidth <= 500;
 
-        if (screenWidth <= 500) {//small screen page bar display
-            console.log("phone screen");
-            const maxPageView = 3;
-            const edgePages = 1;
-            const middlePages = 1;
-            if (pageCount <= 1) return; //if one page don't make page bar
+        const maxPageView = mobile ? 3 : 7;
+        const edgePages = mobile ? 1 : 2;
+        const middlePages = mobile ? 1 : maxPageView - edgePages;
 
-            var html = "";
+        if (pageCount <= 1) return;
 
-            if (pageCount > 1){           
-                //fist page button
-                html += `
-                    <div id="prev">< Prev</div>
-                `;
-                if (pageCount <= maxPageView) {
-                    for (var i = 1; i <= pageCount; i++){
-                        html += `
-                            <div class="pageNumbers ${i === currentPage ? "currentPage" : ""}">
-                                ${i}
-                            </div>
-                        `;
-                    }
-                } else {
-                    html += `
-                        <div class="pageNumbers ${1 === currentPage ? "currentPage" : ""}">
-                            ${1}
-                        </div>
-                    `
-                }
-            
-
-                if (pageCount > maxPageView){
-                    var startMiddle, endMiddle;
-
-                    /* near beginning */
-                    if(currentPage <= edgePages + 1){
-                        startMiddle = edgePages + 1;
-                        endMiddle = edgePages + middlePages;
-                    }
-
-                    /* near end */
-                    else if(currentPage >= pageCount - edgePages){
-                        startMiddle = pageCount - middlePages - edgePages + 1;
-                        endMiddle = pageCount - edgePages;
-                    }
-
-                    /* middle */
-                    else{
-                        const half = Math.floor(middlePages / 2);
-                        startMiddle = currentPage - half;
-                        endMiddle = startMiddle + middlePages - 1;
-
-                        if (startMiddle < edgePages + 1){
-                            startMiddle = edgePages + 1;
-                            endMiddle = startMiddle + middlePages - 1;
-                        }
-                        if (endMiddle > pageCount - edgePages){
-                            endMiddle = pageCount - edgePages;
-                            startMiddle = endMiddle - middlePages + 1;
-                        }
-                    }
-
-                    //elipse once deep enough into pages
-                    if (startMiddle > edgePages + 1){
-                        html += ` <div>...</div> `;
-                    }
-                    //sliding middle
-                    for (var j = startMiddle; j <= endMiddle; j++){
-                        html += `
-                            <div class="pageNumbers ${j === currentPage ? "currentPage" : ""}">
-                                ${j}
-                            </div>
-                        `;
-                    }
-                    //elispse when not too deep
-                    if (endMiddle < pageCount - edgePages) {
-                        html += ` <div>...</div> `;
-                    }
-                    //last two
-                    html += `
-                        <div class="pageNumbers ${pageCount === currentPage ? "currentPage" : ""}">
-                            ${pageCount}
-                        </div>
-                    `;
-                }
-
-                //next button
-                html += ` <div id="next">Next ></div> `;
-                document.getElementById("pageBar").innerHTML = html;
-            }
+        var html = "";
+       
+        //fist two page buttons
+        html += ` <div id="prev"> < Prev </div> `;
+        if (pageCount <= maxPageView) {
+            for (var i = 1; i <= pageCount; i++) html += getPageNumberButton(i);
+        } else {
+            for (var i = 1; i <= edgePages; i++) html += getPageNumberButton(i);
         }
-        else { //page par on large screens
-            console.log("wide screen");
-            const maxPageView = 7;
-            const edgePages = 2;
-            const middlePages = maxPageView - edgePages;
-
-            if (pageCount <= 1) return;
-
-            var html = "";
-
-            if (pageCount > 1){           
-                //fist two page buttons
-                html += `
-                    <div id="prev">< Prev</div>
-                `;
-                if (pageCount <= maxPageView) {
-                    for (var i = 1; i <= pageCount; i++){
-                        html += `
-                            <div class="pageNumbers ${i === currentPage ? "currentPage" : ""}">
-                                ${i}
-                            </div>
-                        `;
-                    }
-                } else {
-                    html += `
-                        <div class="pageNumbers ${1 === currentPage ? "currentPage" : ""}">
-                            ${1}
-                        </div>
-                        <div class="pageNumbers ${2 === currentPage ? "currentPage" : ""}">
-                            ${2}
-                        </div>
-                    `;
-                }
             
+        if (pageCount > maxPageView){
+            var startMiddle, endMiddle;
 
-                if (pageCount > maxPageView){
-                    var startMiddle, endMiddle;
-
-                    /* near beginning */
-                    if(currentPage <= edgePages + 1){
-                        startMiddle = edgePages + 1;
-                        endMiddle = edgePages + middlePages;
-                    }
-
-                    /* near end */
-                    else if(currentPage >= pageCount - edgePages){
-                        startMiddle = pageCount - middlePages - edgePages + 1;
-                        endMiddle = pageCount - edgePages;
-                    }
-
-                    /* middle */
-                    else{
-                        const half = Math.floor(middlePages / 2);
-                        startMiddle = currentPage - half;
-                        endMiddle = startMiddle + middlePages - 1;
-
-                        if (startMiddle < edgePages + 1){
-                            startMiddle = edgePages + 1;
-                            endMiddle = startMiddle + middlePages - 1;
-                        }
-                        if (endMiddle > pageCount - edgePages){
-                            endMiddle = pageCount - edgePages;
-                            startMiddle = endMiddle - middlePages + 1;
-                        }
-                    }
-
-                    //elipse once deep enough into pages
-                    if (startMiddle > edgePages + 1){
-                        html += ` <div>...</div> `;
-                    }
-                    //sliding middle
-                    for (var j = startMiddle; j <= endMiddle; j++){
-                        html += `
-                            <div class="pageNumbers ${j === currentPage ? "currentPage" : ""}">
-                                ${j}
-                            </div>
-                        `;
-                    }
-                    //elispse when not too deep
-                    if (endMiddle < pageCount - edgePages) {
-                        html += ` <div>...</div> `;
-                    }
-                    //last two
-                    html += `
-                        <div class="pageNumbers ${pageCount-1 === currentPage ? "currentPage" : ""}">
-                            ${pageCount-1}
-                        </div>
-                        <div class="pageNumbers ${pageCount === currentPage ? "currentPage" : ""}">
-                            ${pageCount}
-                        </div>
-                    `;
-                }
-
-                //next button
-                html += ` <div id="next">Next ></div> `;
-                document.getElementById("pageBar").innerHTML = html;
+            /* near beginning */
+            if(currentPage <= edgePages + 1){
+                startMiddle = edgePages + 1;
+                endMiddle = edgePages + middlePages;
             }
 
+            /* near end */
+            else if(currentPage >= pageCount - edgePages){
+                startMiddle = pageCount - middlePages - edgePages + 1;
+                endMiddle = pageCount - edgePages;
+            }
+
+            /* middle */
+            else{
+                const half = Math.floor(middlePages / 2);
+                startMiddle = currentPage - half;
+                endMiddle = startMiddle + middlePages - 1;
+
+                if (startMiddle < edgePages + 1){
+                    startMiddle = edgePages + 1;
+                    endMiddle = startMiddle + middlePages - 1;
+                }
+                if (endMiddle > pageCount - edgePages){
+                    endMiddle = pageCount - edgePages;
+                    startMiddle = endMiddle - middlePages + 1;
+                }
+            }
+
+            //elipse once deep enough into pages
+            if (startMiddle > edgePages + 1) html += ` <div>...</div> `;
+    
+            //sliding middle
+            for (var j = startMiddle; j <= endMiddle; j++) html += getPageNumberButton(j);
+            
+            //elispse when not too deep
+            if (endMiddle < pageCount - edgePages) html += ` <div>...</div> `;
+            
+            //back edge buttons
+            for (var i = pageCount - edgePages + 1; i <= pageCount; i++) html += getPageNumberButton(i);
         }
+
+        //next button
+        html += ` <div id="next">Next ></div> `;
+        document.getElementById("pageBar").innerHTML = html;       
     }
+
     //render all
     function renderCatalog(inventoryArray){
         renderSettings(inventoryArray);
@@ -1003,149 +820,79 @@ function getCurrentInventory(){
             isRendering = false;
         }
     }
+//********* end of catalog page functions *********/
 
-var imageManifest = {};
-async function loadImageManifest(){
-    const response = await fetch("inventory/imageManifest.json");
-    imageManifest = await response.json();
-}
-
-//render function for product page
-function renderProductPage(product){
-
-    document.getElementById("page-title").textContent = "Roof Jewelers | "+product["Product Name"];
-
-    document.getElementById("productImg").src = "inventory/inventory-images/"+product["Product Image"];
-
-    const imgBar = document.getElementById("imgBar");
-    const images = (imageManifest[product["Item#"].toLowerCase()] || []).sort();
-
-    document.getElementById("productName").textContent = product["Product Name"];
-    document.getElementById("descriptionScroll").textContent = product["Description"];
-
-    var html = "";
-
-    if(product["Brand"] === "brands-citizen"){//watch discounts
-        product["Price"] = product["Retail"] - (product["Retail"] * .25);
+//******** render function for product page
+    const money = new Intl.NumberFormat('en-US', {style: 'currency',currency: 'USD'});
+    function moneyFormat(value){
+        return money.format(value);
     }
-
-    var retail = new Intl.NumberFormat('en-US', {style: 'currency',currency: 'USD'}).format(product["Retail"]);
-    var sellingPrice = new Intl.NumberFormat('en-US', {style: 'currency',currency: 'USD'}).format(product["Price"]);
-    var saved = new Intl.NumberFormat('en-US', {style: 'currency',currency: 'USD'}).format(product["Retail"] - product["Price"]);
-    
-    if (product["Retail"] > product["Price"]) {
-        html = `
-            <h3> Retail: ${retail} </h3>
-            <h1> Price: ${sellingPrice}</h1>
-            <h3> You Save: ${saved}</h3>
-        `;
-    } else if (product["Retail"] > 0){
-        html = `
-            <h1> Price: ${retail}</h1>
-        `;
-    } else if (product["Price"] > 0) {
-        html = `
-            <h1> Price: ${sellingPrice}</h1>
-        `;
-    } else {
-        html = `
-            <h1> Price Not Availible </h1>
-        `;
-    }
-    document.getElementById("priceDiv").innerHTML = html;
-
-    var imageHtml = "";
-    for (const image of images){ //makes the html for the thumbnail images
-        imageHtml += `
-            <img class="pImg" src="inventory/inventory-images/${image}" onerror="this.src='images/img-placeholder.svg'">
-        `;
-    }
-
-    if (images.length > 3){//loads the image thumbnails below the main
-        html = `
-            <span class="arrow" id="pLeft" style="transform: rotateY(180deg);">&nbsp&#10148;</span>
-                <div id="imgLibrary">
-                    <div id="imgTrack">
-                        ${imageHtml}
-                    </div>
-                </div>
-            <span class="arrow" id="pRight">&nbsp&#10148;</span>
-        `;
-    } else if (images.length > 1) {
-        html = `
-            <div id="imgTrack">
-                ${imageHtml}
-            </div>       
-        `;
-    } else {
-        html = "";
-    }
-    imgBar.innerHTML = html;
-    initializeCarousel();
-
-    document.getElementById("itemID").textContent = "Item#: "+product["Item#"];
-    document.getElementById("availibility").textContent = "Availibility: "+product["Status"];
-    document.getElementById("quantity").textContent = "Quantity: "+product["Stock"];
-}
-
-function initializeCarousel() {
-    const track = document.getElementById("imgTrack");
-
-    const imgs = document.querySelectorAll(".pImg");
-
-    if (imgs.length > 0){
-        const slides = track.children;
-
-        if (imgs.length > 3){
-            for(var i = 0; i < 3; i++){
-                var clone = imgs[i].cloneNode(true);
-                track.appendChild(clone)
-            }
-
-            const lbtn = document.getElementById("pLeft");
-            const rbtn = document.getElementById("pRight");
-
-            var index = 0;
-            const slideWidth = 70;
-
-            lbtn.addEventListener('click', function(){
-                if(index === 0){ /*if at first slide turns off animation jumps to clone at the end and then moves back after turning animation on*/
-                        /* jump instantly to cloned slide */
-                        track.style.transition = "none";
-
-                        index = slides.length - 3;
-
-                        track.style.transform = `translateX(-${index * slideWidth}px)`;
-
-                        setTimeout(() => {
-                            track.style.transition = "transform 0.7s ease-in-out";
-                            index--;
-                            track.style.transform = `translateX(-${index * slideWidth}px)`;
-                        }, 20);
-                    } else updateSlide(0);    
-                });
-
-            rbtn.addEventListener('click', function(){
-                updateSlide(1);
-
-                if(index === slides.length - 3){ /*if at the clone of the first slide turns off animation jumps to start and turns animation on again*/
-                        setTimeout(() => { /*=> is wait until finished*/
-                            track.style.transition = "none";
-                            index = 0;
-                            track.style.transform = `translateX(0px)`;
-                        }, 1000);
-                    }    
-                });
-
-            function updateSlide(num){
-                if(num === 0) index--;
-                if(num === 1) index++;
-
-                track.style.transition = "transform 1s ease-in-out";
-                track.style.transform = `translateX(-${index * slideWidth}px)`;
-            }
+    function getProductPriceHtml(product){
+        //watch discount
+        var price = product["Price"];
+        if(product["Brand"] === "brands-citizen") price = product["Retail"] * 0.75;
+        
+        const retail = moneyFormat(product["Retail"]);
+        const sellingPrice = moneyFormat(price);
+        const saved = moneyFormat(product["Retail"] - price);
+        
+        if (product["Retail"] > price) {
+            return `
+                <h3> Retail: ${retail} </h3>
+                <h1> Price: ${sellingPrice}</h1>
+                <h3> You Save: ${saved}</h3>
+            `;
+        } 
+        if (product["Retail"] > 0){
+            return `
+                <h1> Price: ${retail}</h1>
+            `;
+        } 
+        if (price > 0) {
+            return `
+                <h1> Price: ${sellingPrice}</h1>
+            `;
         }
+        return `
+            <h1> Price Not Availible </h1>
+        `;  
+    }
+    function getImageLibHtml(imageHtml, imageCount){
+        if (imageCount > 3){//loads the image thumbnails below the main
+            return `
+                <span class="arrow" id="pLeft" style="transform: rotateY(180deg);">&nbsp&#10148;</span>
+                    <div id="imgLibrary">
+                        <div id="imgTrack">
+                            ${imageHtml}
+                        </div>
+                    </div>
+                <span class="arrow" id="pRight">&nbsp&#10148;</span>
+            `;
+        } 
+        if (imageCount > 1) {
+            return `
+                <div id="imgTrack">
+                    ${imageHtml}
+                </div>       
+            `;
+        }
+        return "";  
+    }
 
+    function setUpImageButtons(track, slides){
+        var index = 0;
+        const slideWidth = 70;
+
+        const lbtn = document.getElementById("pLeft");
+        const rbtn = document.getElementById("pRight");
+
+        function updateSlide(direction){
+            if (direction === -1) index--;
+            else index++;
+
+            track.style.transition = "transform 1s ease-in-out";
+            track.style.transform = `translateX(-${index * slideWidth}px)`;
+        }
         track.addEventListener(
             "click",
             function(event){
@@ -1153,10 +900,80 @@ function initializeCarousel() {
                     document.getElementById("productImg").src = event.target.src;
                 }
             }
-        );        
+        );
+        if (lbtn && rbtn){
+            const cloneCount = 3;
+            lbtn.addEventListener('click', function(){
+                if(index === 0){ /*if at first slide turns off animation jumps to clone at the end and then moves back after turning animation on*/
+                    /* jump instantly to cloned slide */
+                    track.style.transition = "none";
+
+                    index = slides.length - cloneCount;
+
+                    track.style.transform = `translateX(-${index * slideWidth}px)`;
+
+                    setTimeout(() => {
+                        track.style.transition = "transform 0.7s ease-in-out";
+                        index--;
+                        track.style.transform = `translateX(-${index * slideWidth}px)`;
+                    }, 20);
+                } else updateSlide(-1);    
+            });
+
+            rbtn.addEventListener('click', function(){
+                updateSlide(1);
+
+                if(index === slides.length - cloneCount){ /*if at the clone of the first slide turns off animation jumps to start and turns animation on again*/
+                    setTimeout(() => { /*=> is wait until finished*/
+                        track.style.transition = "none";
+                        index = 0;
+                        track.style.transform = `translateX(0px)`;
+                    }, 1000);
+                }    
+            });
+        }
+    }
+    function initializeCarousel(){
+        const track = document.getElementById("imgTrack");
+        const imgs = document.querySelectorAll(".pImg");
+
+        const slides = track ? track.children : null;
+
+        if (imgs.length === 0) return;
+
+        if (imgs.length > 3){
+            for(var i = 0; i < 3; i++){
+                var clone = imgs[i].cloneNode(true);
+                track.appendChild(clone)
+            } 
+        }
+        setUpImageButtons(track, slides);
     }
 
-}
+    function renderProductPage(product){
+        const imgBar = document.getElementById("imgBar");
+        const images = (imageManifest[product["Item#"].toLowerCase()] || []).sort();
+
+        document.getElementById("page-title").textContent = "Roof Jewelers | "+product["Product Name"];
+        document.getElementById("productImg").src = "inventory/inventory-images/"+product["Product Image"];
+
+        document.getElementById("productName").textContent = product["Product Name"];
+        document.getElementById("descriptionScroll").textContent = product["Description"];
+        document.getElementById("priceDiv").innerHTML = getProductPriceHtml(product);
+
+        const imageHtml = images.map(image => `
+                <img class="pImg" src="inventory/inventory-images/${image}" onerror="this.src='images/img-placeholder.svg'">
+            `
+        ).join("");
+
+        imgBar.innerHTML = getImageLibHtml(imageHtml, images.length);
+        initializeCarousel();
+
+        document.getElementById("itemID").textContent = "Item#: "+product["Item#"];
+        document.getElementById("availibility").textContent = "Availibility: "+product["Status"];
+        document.getElementById("quantity").textContent = "Quantity: "+product["Stock"];
+    }
+//******** end product page fuctions *********/
 
 //function for link standardization
 function applyNavigation(navigation){ //primary use footer
@@ -1164,31 +981,19 @@ function applyNavigation(navigation){ //primary use footer
         
     elements.forEach(element => {
         const id = element.dataset.navigation;
-
         const item = findByProperty(navigation, "id", id);      
 
-        if(item){
-            var href = buildlink(item);
-            if(href){
-                element.innerHTML = `
-                    <a href="${href}">
-                        ${item.title}
-                    </a>
-                `;
-            }
-        } else {
-            return null;
-        }
-    });
-    
+        if(!item) return null;
+
+        const href = buildLink(item);
+        if(href) element.innerHTML = `<a href="${href}"> ${item.title} </a>`;      
+    });  
 }
 
 //page initilization functions
     /* load shared components */
     async function initializePage(){
-        await loadNavigation();
-
-        await loadImageManifest();
+        await generateJson();
 
         await loadHTML("header-placeholder", "header.html");
 
@@ -1198,7 +1003,6 @@ function applyNavigation(navigation){ //primary use footer
 
         await setupExternalLinks();
 
-        await loadconfig();
         await applyConfig();
         await applyNavigation(navigation);
 
@@ -1261,22 +1065,8 @@ function applyNavigation(navigation){ //primary use footer
         document.body.style.opacity = "1"; /* allows fade into website */
     }
     /* load info pages */
-    async function initializeInfoPage(){
-        await loadNavigation();
-
-        const params = new URLSearchParams(window.location.search);
-
-        const lslug = params.get("lslug");
-
-        console.log(lslug);
-
-        const category = findByProperty(navigation, "lslug", lslug);
-
-        if(!category) window.location.href = "404page.html";
-
-        var html = "";
-        if (lslug === "jewelry-repair") { /* Jewelry repair page */
-            html = `
+    const infoPageContent = {//info page code stored as a callable array
+            "jewelry-repair": `
                     <h1>Jewelry Repair</h1>
                     <div class="infobox">
                         <p>
@@ -1311,38 +1101,32 @@ function applyNavigation(navigation){ //primary use footer
                             pieces of hollow jewelry.
                         </p>
                     </div>
-            `;
-            
-        }
-        if (lslug === "brands") { /* brands page */
-            html = `
-                    <h1>Brands We Carry</h1>
-                    <div class="infobox">
-                            <ul>
-                                <li><a href="https://artcarvedbridal.com/collections/engagement-rings"> ArtCarved Bridal</a></li>
-                                <li><a href="https://carlacorp.com/">Carla Earrings</a></li>
-                                <li>Citizen</li>
-                                <li>Classic of New York</li>
-                                <li>GIA & EGL Certified Diamonds</li>
-                                <li>Goldman Wedding Bands</li>
-                                <li>Hadley-Roma Watch Bands</li>
-                                <li>Hagerty Jewelry Cleaning Products</li>
-                                <li>Inox - Men's Jewelry</li>
-                                <li>Kiddie Kraft</li>
-                                <li>Lafonn</li>
-                                <li>Leslie's Gold</li>
-                                <li><a href="https://lestage.com/products/convertible">LeStage Convertibles</a></li>
-                                <li><a href="https://www.rembrandtcharms.com/">Rembrandt Charms</a></li>
-                                <li>Royal Chain</li>
-                                <li>Southern Gates</li>
-                                <li>Thorsten</li>
-                            </ul>                    
-                    </div>
-            `;
-            
-        }
-        if (lslug === "about-us") { /* about us page */
-            html = `
+            `,
+            "brands": `
+                <h1>Brands We Carry</h1>
+                <div class="infobox">
+                    <ul>
+                        <li><a href="https://artcarvedbridal.com/collections/engagement-rings" target="_blank"> ArtCarved Bridal</a></li>
+                        <li><a href="https://carlacorp.com/" target="_blank">Carla Earrings</a></li>
+                        <li><a href="/catalog.html?slug=citizen"> Citizen </a></li>
+                        <li><a href="/catalog.html?slug=classic-of-new-york"> Classic of New York </a></li>
+                        <li> GIA & EGL Certified Diamonds </li>
+                        <li> Goldman Wedding Bands </li>
+                        <li> Hadley-Roma Watch Bands </li>
+                        <li><a href="/catalog.html?slug=hagerty-jewelry-cleaner"> Hagerty Jewelry Cleaning Products </a></li>
+                        <li> Inox - Men's Jewelry </li>
+                        <li><a href="/catalog.html?slug=kiddie-kraft"> Kiddie Kraft </a></li>
+                        <li><a href="/catalog.html?slug=lafonn"> Lafonn </a></li>
+                        <li> Leslie's Gold </li>
+                        <li><a href="https://lestage.com/products/convertible" target="_blank"> LeStage Convertibles </a></li>
+                        <li><a href="https://www.rembrandtcharms.com/" target="_blank"> Rembrandt Charms </a></li>
+                        <li><a href="/catalog.html?slug=royal-chain"> Royal Chain </a></li>
+                        <li><a href="/catalog.html?slug=southern-gates"> Southern Gates </a></li>
+                        <li><a href="/catalog.html?slug=thorsten-rings"> Thorsten Rings </a></li>
+                    </ul>                    
+                </div>
+            `,
+            "about-us": `
                     <h1>About Us</h1>
                     <div class="infobox">
                         <p>
@@ -1371,11 +1155,8 @@ function applyNavigation(navigation){ //primary use footer
                             We honor our legacy by providing some of the best jewelry and custom design work available.
                         </p>
                     </div>
-            `;
-            
-        }
-        if (lslug === "loose-stones") { /* loose stones page */
-            html = `
+            `,
+            "loose-stones": `
                     <h1>Loose Diamonds</h1>
                     <div class="infobox">
                         <p>
@@ -1385,10 +1166,8 @@ function applyNavigation(navigation){ //primary use footer
                         </p>
                         <img src="images/certified-loose-diamonds-header.jpg" alt="" id="loose-stones-flyer">
                     </div>
-            `;      
-        }
-        if (lslug === "watch-repair") { /* watch repair page */
-            html = `
+            `,    
+            "watch-repair": `
                     <h1>Watch Repair</h1>
                     <div class="infobox">
                         <ul>
@@ -1429,11 +1208,8 @@ function applyNavigation(navigation){ //primary use footer
                             or for setting complicated watches (ie. digital or perpetual calendar watches).
                         </p>
                     </div>
-            `;
-            
-        }
-        if (lslug === "class-rings") { /* class rings page */
-            html = `
+            `,
+            "class-rings": `
                     <h1>Class Rings</h1>
                     <div class="infobox">
                         <P>
@@ -1449,11 +1225,8 @@ function applyNavigation(navigation){ //primary use footer
                         <img src="images/classrings_001rev.jpg" alt="">
                         <img src="images/classrings_002rev.jpg" alt="">
                     </div>
-            `;
-            
-        }
-        if (lslug === "store-hours") { /* store hours page */
-            html = `
+            `,
+            "store-hours": `
                     <h1>Store Hours</h1>
                     <div class="infobox">
                         <h2>Regular Hours</h2>
@@ -1473,122 +1246,116 @@ function applyNavigation(navigation){ //primary use footer
                                 <li>Closed Saturday, Sunday and Monday</li>
                             </ul>
                     </div>
-            `;
-            
-        }
-        if (lslug === "faq") { /* faq page */
-            html = `
-                    <h1>Frequently Asked Questions</h1>
-                    <div class="infobox">
-                        <h3>Do we repair jewelry?</h3>
-                        <p>
-                            Yes we do, and if you would like more information on the different repair and service options 
-                            we offer see the Services & Repair tab in the navigation menu above.
-                        </p>
-                        <h3>Do we carry watches?</h3>
-                        <p>
-                            Yes, we carry Citizen brand watches.
-                        </p>
-                        <h3>Do we buy gold?</h3>
-                        <p>
-                            Yes, we buy gold, silver and platinum items for their scrap value.
-                        </p>
-                    </div>
-            `;
-            
-        }
-        if (lslug === "financing-options") { /* financing-options page */
-            html = `
-                    <h1>Financing Options</h1>
-                    <div class="infobox">
-                        <h2>Snap Finance:</h2>
-                        <p>
-                            Getting Started
-                        </p>
-                            <ul>
-                                <li>Apply: Text 56837 to 48078</li>
-                                <li>Get Approved: Receive a decision in seconds, with approval amounts up to $5,000</li>
-                                <li>Shop: Use your approved amount to take home what you need today!</li>
-                            </ul>
+            `,
+            "faq": `
+                <h1>Frequently Asked Questions</h1>
+                <div class="infobox">
+                    <h3>Do we repair jewelry?</h3>
+                    <p>
+                        Yes we do, and if you would like more information on the different repair and service options 
+                        we offer see the Services & Repair tab in the navigation menu above.
+                    </p>
+                    <h3>Do we carry watches?</h3>
+                    <p>
+                        Yes, we carry Citizen brand watches.
+                    </p>
+                    <h3>Do we buy gold?</h3>
+                    <p>
+                        Yes, we buy gold, silver and platinum items for their scrap value.
+                    </p>
+                </div>
+            `,
+            "financing-options": `
+                <h1>Financing Options</h1>
+                <div class="infobox">
+                    <h2>Snap Finance:</h2>
+                    <p> Getting Started </p>
+                    <ul>
+                        <li>Apply: Text 56837 to 48078</li>
+                        <li>Get Approved: Receive a decision in seconds, with approval amounts up to $5,000</li>
+                        <li>Shop: Use your approved amount to take home what you need today!</li>
+                    </ul>
                         
-                        <p>
-                            To Apply, You Must
-                        </p>
-                            <ul>
-                                <li>Be at least 18 years of age</li>
-                                <li>Have a monthly income of $750 or more</li>
-                                <li>Have an active checking account (May need a credit/debit card to apply)</li>
-                                <li>Have a valid email address and phone number</li>
-                            </ul>
-                        
-                        <h2>In-Store Lay-A-Way</h2>
-                        <p>
-                            Shopping early for a gift a few months away but don't want it to be found before that special day? 
-                            Use our convenient In-Store Lay-A-Way service to have your item saved for you for up to 90 days 
-                            while you make weekly or monthly payments on the item until its yours.
-                        </p>
-                            <ul>
-                                <li>Down payment: 25% or $25 whichever is greater.</li>
-                                <li>Remaining balance is divided into three equal monthly payments; installments may be made more often.</li>
-                                <li>Deposits on lay-a-way items are non-refundable after 10 days but may be used as store credit.</li>
-                                <li>Merchandise will be returned to stock after 90 days, however any payments will remain as store credit.</li>
-                                <li>Money may be forfeit after an extended period of time.</li>
-                            </ul>                  
-                    </div>
-            `;
-            
-        }
-        if (lslug === "services-and-repair") { /* service and repair page */
-            html = `
-                    <h1>Services & Repair Options</h1>
-                    <div class="infobox">
-                            <ul>
-                                <li><span data-navigation="services-and-repair-financing"></span></li>
-                                <li><span data-navigation="services-and-repair-jewelry-repair"></span></li>
-                                <li><span data-navigation="services-and-repair-jewelry-care"></span></li>
-                                <li><span data-navigation="services-and-repair-watch-repair"></span></li>                                
-                            </ul>                    
-                    </div>
-            `;
-            console.log(html);
+                    <p> To Apply, You Must </p>
+                    <ul>
+                        <li>Be at least 18 years of age</li>
+                        <li>Have a monthly income of $750 or more</li>
+                        <li>Have an active checking account (May need a credit/debit card to apply)</li>
+                        <li>Have a valid email address and phone number</li>
+                    </ul>
+                    
+                    <h2>In-Store Lay-A-Way</h2>
+                    <p>
+                        Shopping early for a gift a few months away but don't want it to be found before that special day? 
+                        Use our convenient In-Store Lay-A-Way service to have your item saved for you for up to 90 days 
+                        while you make weekly or monthly payments on the item until its yours.
+                    </p>
+                    <ul>
+                        <li>Down payment: 25% or $25 whichever is greater.</li>
+                        <li>Remaining balance is divided into three equal monthly payments; installments may be made more often.</li>
+                        <li>Deposits on lay-a-way items are non-refundable after 10 days but may be used as store credit.</li>
+                        <li>Merchandise will be returned to stock after 90 days, however any payments will remain as store credit.</li>
+                        <li>Money may be forfeit after an extended period of time.</li>
+                    </ul>                  
+                </div>
+            `,
+            "services-and-repair": `
+                <h1>Services & Repair Options</h1>
+                <div class="infobox">
+                    <ul>
+                        <li><span data-navigation="services-and-repair-financing"></span></li>
+                        <li><span data-navigation="services-and-repair-jewelry-repair"></span></li>
+                        <li><span data-navigation="services-and-repair-jewelry-care"></span></li>
+                        <li><span data-navigation="services-and-repair-watch-repair"></span></li>                                
+                    </ul>                    
+                </div>
+            `
+    }
+    async function initializeInfoPage(){
+        const params = getParams();
+        const lslug = params.get("lslug");
+
+        const category = findByProperty(navigation, "lslug", lslug);
+
+        if(!category) {
+            window.location.href = "404page.html";
+            return;
         }
 
-        document.getElementById("infocontainer").innerHTML = html;
+        document.getElementById("infocontainer").innerHTML = infoPageContent[lslug] || "";
         applyNavigation(navigation);
         renderInfoPage(category);
     }   
     //functions to populate the catalog page
     async function initilalizeCatologPage(){
-        await loadNavigation();
-
-        const params = new URLSearchParams(window.location.search);
+        const params = getParams();
 
         const slug = params.get("slug");
+        const category = findByProperty(navigation, "slug", slug);
+        const depthTrail = trackCategoryPath(navigation, slug);
+
+        const search = params.get("search") || "";
         const pageParam = params.get("page");
 
-        currentCatalogPage = pageParam !== null? parseInt(pageParam): null;
+        currentCatalogPage = pageParam !== null ? parseInt(pageParam) : null;
 
-        const category = findByProperty(navigation, "slug", slug);
+        const searchBar = document.getElementById("searchBar");
 
-        if(!category) window.location.href = "404page.html";
+        if(!category) {
+            window.location.href = "404page.html";
+            return;
+        }
 
         //sets page title, meta descriptions and content header
         await renderCatalogPage(category);
 
         //sub header function calls
-        const depthTrail = trackCategoryPath(navigation, slug);
         await renderCategoryPath(depthTrail);
-
         await getSubCategories(category);
 
         //catalog display function calls
         await initilalizeCatolog();  
         await initializeAttributeBar();  
-
-        var search = params.get("search");
-        if (search === null) search = "";
-
-        const searchBar = document.getElementById("searchBar");
 
         if (searchBar) {
             searchBar.value = search || "";
@@ -1597,9 +1364,7 @@ function applyNavigation(navigation){ //primary use footer
     }
     //function to load product page
     async function initializeProductPage(){
-        await loadInventory();
-        await loadNavigation();
-        const params = new URLSearchParams(window.location.search);
+        const params = getParams();
 
         const itemNum = params.get("item");
         const page = params.get("page");
@@ -1619,7 +1384,6 @@ function applyNavigation(navigation){ //primary use footer
         if (depthTrail !== null) renderCategoryPath(depthTrail);
 
         renderProductPage(product);
-
         renderFeaturedProducts();
     }
     //function to load attribute system
@@ -1630,9 +1394,13 @@ function applyNavigation(navigation){ //primary use footer
         if (!minSlider) return;
 
         var maxSlider = document.getElementById("maxPrice");
+        const sliderRange = document.getElementById("slider-range");
 
         const savedMin = parseInt(sessionStorage.getItem("minPrice")) || 0;
         const savedMax = parseInt(sessionStorage.getItem("maxPrice")) || MaxSortPrice;
+
+        const minValue = document.getElementById("minValue");
+        const maxValue = document.getElementById("maxValue");
 
         minSlider.value = Math.min(savedMin, MaxSortPrice);
         maxSlider.value = Math.min(savedMax, MaxSortPrice);
@@ -1642,19 +1410,8 @@ function applyNavigation(navigation){ //primary use footer
             sessionStorage.removeItem("minPrice");
         }
 
-        const minValue = document.getElementById("minValue");
-        const maxValue = document.getElementById("maxValue");
-
-        const sliderRange = document.getElementById("slider-range");
-
-        minSlider.oninput = function(){
-            resetPage = true;
-            updatePriceRange();
-        }
-        maxSlider.oninput = function(){
-            resetPage = true;
-            updatePriceRange();
-        }
+        setUpSlider(minSlider);
+        setUpSlider(maxSlider);
 
         resetPage = false;
 
@@ -1662,48 +1419,6 @@ function applyNavigation(navigation){ //primary use footer
         updatePriceRange();
         initializeSlider = false;
 
-        minValue.onclick = function(){
-            minValue.hidden = true;
-            minInput.hidden = false;
-            minInput.focus();
-        }
-        minInput.onblur = function(){
-            minValue.textContent = this.value;
-            minSlider.value = this.value;
-            minInput.hidden = true;
-            minValue.hidden = false;
-            resetPage = true;
-            updatePriceRange();
-        }
-        minInput.onfocus = function(){
-            this.select();
-        }
-        minInput.onkeydown = function(event){
-            if(event.key === "Enter"){
-                this.blur();
-            }
-        };
-
-        maxValue.onclick = function(){
-            maxValue.hidden = true;
-            maxInput.hidden = false;
-            maxInput.focus();
-        }
-        maxInput.onblur = function(){
-            maxValue.textContent = this.value;
-            maxSlider.value = this.value;
-            maxInput.hidden = true;
-            maxValue.hidden = false;
-            resetPage = true;
-            updatePriceRange();
-        }
-        maxInput.onfocus = function(){
-            this.select();
-        }
-        maxInput.onkeydown = function(event){
-            if(event.key === "Enter"){
-                this.blur();
-            }
-        };
+        setUpSliderInput(minValue, minInput, minSlider);
+        setUpSliderInput(maxValue, maxInput, maxSlider);
     }
-

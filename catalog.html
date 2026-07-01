@@ -48,6 +48,14 @@
                 
             }
 
+            #cat-desription:empty{
+                margin-top: 0px;
+            }
+            #cat-description:not(:empty){
+                margin-top: -40px;
+                font-size: 14pt;
+            }
+
 
             input[type=range]::-webkit-slider-thumb{
                 -webkit-appearance: none;
@@ -132,6 +140,7 @@
                 <div id="tree-bar"></div>
 
                 <h1 id="cat-name"></h1>
+                <p id="cat-description"></p>
                 <div id="categories"></div>
             </div> <!-- end subheader-->
 

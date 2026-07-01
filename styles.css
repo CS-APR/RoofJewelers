@@ -287,19 +287,25 @@ p{
         width: 100%;
         display: block;
     }
-    #left{
+    #left, #right{
         position: absolute;
         top:50%;
-        left:1%;
         cursor: pointer;
         width: 4%;
     }
+    #left{
+        left:1%;
+    }
     #right{
-        position: absolute;
-        top:50%;
         left:95%;
-        cursor: pointer;
-        width: 4%;
+    }
+    @media screen and (max-width: 500px) {
+        #left, #right{
+            width: 8%;
+        }
+        #right{
+            left: 91%;
+        }      
     }
     /********* end slideshow************/
     .ad-container{

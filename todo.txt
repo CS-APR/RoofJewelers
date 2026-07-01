@@ -11,6 +11,10 @@ find a way to standardize catagory and link use from one file so that
 
 - fix sort price range not expanding to the category max when blank search is entered
 
+- make ranked search system so that closest match appears first
+
+- on phone have page bar only show 1,2 ... 3,4,5... 6,7 instead of computer view 5 in middle
+
 ___________________todo__________________________
 
 
@@ -18,4 +22,3 @@ set up time based updating for the hours page
 
 make it so that tabbar becomes a drop down menu when screen is small
 
-make ranked search system so that closest match appears first
