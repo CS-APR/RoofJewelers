@@ -4,7 +4,7 @@ import { inventory, page, data, getParams, findByProperty } from "./state.js";
 
 import { updateValues, renderCatalog, renderAtributeTab } from "./catalog.js";
 
-import { closeAccount, closeCart, closeSearch } from "./panels.js";
+import { closeAccount, closeCart, closeSearch, positionMobilePopover } from "./panels.js";
 
 import { recordSearch } from "./searchAnalytics.js";
 
@@ -20,7 +20,8 @@ import { recordSearch } from "./searchAnalytics.js";
             event.stopPropagation();
             closeAccount();
             closeCart();
-            searchBox.classList.toggle("open");
+            const isOpen = searchBox.classList.toggle("open");
+            if (isOpen) positionMobilePopover(searchBox, search);
         };
 
         document.addEventListener("click",

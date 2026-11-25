@@ -104,6 +104,12 @@ p{
             
             font-size: 20pt;
         }
+        .tabitem #search #searchIcon {
+            display: block;
+            width: 25px;
+            height: 25px;
+            flex: 0 0 25px;
+        }
         .tabitem #search span:active{
             background-color: whitesmoke;
             outline: 1px gray dashed;
@@ -175,7 +181,7 @@ p{
             gap: 5px;
         }
 
-        #accountBox.open input{
+        #accountBox.open input:not([type="checkbox"]){
             height: 25px;
             width: 95%;
         }
@@ -199,6 +205,12 @@ p{
         #showPasswordRow input {
             margin: 0;
             cursor: pointer;
+        }
+
+        #showPasswordRow input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            flex: 0 0 16px;
         }
 
         #accountBox.open p{
@@ -273,6 +285,20 @@ p{
 
         #accountBox.open #register a:hover {
             color: darkslategray;
+        }
+
+        @media screen and (max-width: 600px) {
+            #searchBox.open,
+            #accountBox.open {
+                box-sizing: border-box;
+                width: 230px;
+            }
+
+            #searchBox.open #searchBar,
+            #accountBox.open input:not([type="checkbox"]) {
+                box-sizing: border-box;
+                width: 100%;
+            }
         }
 
 

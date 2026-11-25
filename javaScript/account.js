@@ -1,6 +1,6 @@
 //Coded by APR
 
-import { closeSearch, closeCart } from "./panels.js";
+import { closeSearch, closeCart, positionMobilePopover } from "./panels.js";
 import { loadCartDisplay, loadWishlist } from "./cart.js";
 import { signIn, signOut } from "./accountManager.js";
 import { showToast } from "./ui.js";
@@ -23,7 +23,8 @@ export function setAccountMenuRefresher(refresher) {
             event.stopPropagation();
             closeSearch();
             closeCart();
-            accountBox.classList.toggle("open");
+            const isOpen = accountBox.classList.toggle("open");
+            if (isOpen) positionMobilePopover(accountBox, accountButton);
         }
 
         accountBox.onclick = function(event){
