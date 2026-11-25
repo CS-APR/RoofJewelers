@@ -1,9 +1,12 @@
 //coded by APR
 
-import { shopping } from "./state.js";
+import { shopping, inventory } from "./state.js";
 import { moneyFormat, showToast } from "./ui.js";
-import { closeSearch } from "./search.js";
-import { closeAccount } from "./account.js";
+import { closeSearch, closeAccount } from "./panels.js";
+
+import { addRemoteWishlistItem, removeRemoteWishlistItem } from "./wishlistSync.js";
+
+import { getCurrentUser } from "./accountManager.js";
 
     //save
     export function saveCart(){
@@ -16,11 +19,34 @@ import { closeAccount } from "./account.js";
 
     //load
     export function loadCart(){
-        shopping.shoppingCart = JSON.parse(localStorage.getItem("shoppingCart")) || [];
+        shopping.shoppingCart = loadStoredProducts("shoppingCart", true);
     }
 
     export function loadWishlist(){
-        shopping.shoppingList = JSON.parse(localStorage.getItem("shoppingList")) || [];
+        shopping.shoppingList = loadStoredProducts("shoppingList");
+    }
+
+    function loadStoredProducts(key, isCart = false) {
+        try {
+            const stored = JSON.parse(localStorage.getItem(key) || "[]");
+            if (!Array.isArray(stored)) return [];
+
+            return stored.flatMap(saved => {
+                if (!saved || typeof saved["Item#"] !== "string") return [];
+                const product = inventory.inventory.find(item => item["Item#"] === saved["Item#"]);
+                if (!product) return [];
+
+                if (!isCart) return [{ ...product, CartQuantity: 1 }];
+
+                const requested = Number(saved.CartQuantity) || 1;
+                const max = Number(product.Stock) > 0 ? Number(product.Stock) : 1;
+                const quantity = Math.max(1, Math.min(Math.floor(requested), max));
+                return [{ ...product, CartQuantity: quantity }];
+            });
+        } catch (error) {
+            console.warn(`Stored ${key} data is invalid; starting empty:`, error);
+            return [];
+        }
     }
 
     
@@ -139,8 +165,19 @@ import { closeAccount } from "./account.js";
             saveCart();
             showToast("Item added to cart.");
         } else {
-            saveWishlist();
-            showToast(product.Stock === 0 ? "Out-of-Stock item added to wishlist." : "Item added to wishlist.");
+            syncWishlistChange(product["Item#"], true).then(() => {
+                showToast(
+                    product.Stock === 0
+                        ? "Out-of-Stock item added to wishlist."
+                        : "Item added to wishlist."
+                );
+            }).catch(error => {
+                console.error("Wishlist sync failed:", error);
+                const index = array.findIndex(item => item["Item#"] === product["Item#"]);
+                if (index !== -1) array.splice(index, 1);
+                loadCartDisplay();
+                showToast(error.message || "Unable to save wishlist to your account.");
+            });
         }
     }
 
@@ -170,18 +207,26 @@ import { closeAccount } from "./account.js";
     }
 
     //remove
-    export function removeCartList(array, itemNumber) {
+    export async function removeCartList(array, itemNumber) {
         const index = array.findIndex(item => item["Item#"] === itemNumber);
         if (index == -1) return;
 
-        array.splice(index, 1);
-
-        if (array === shopping.shoppingCart) {
+        if (array === shopping.shoppingList) {
+            try {
+                const isAccountWishlist = await syncWishlistChange(itemNumber, false);
+                array.splice(index, 1);
+                if (!isAccountWishlist) saveWishlist();
+            } catch (error) {
+                console.error("Wishlist removal failed:", error);
+                showToast(error.message || "Unable to remove this item from your wishlist.");
+                return;
+            }
+        } else {
+            array.splice(index, 1);
             saveCart();
             updateCartCount();
-            figureTotal();
+            if (document.getElementById("subtotalPrice")) figureTotal();
         }
-        else saveWishlist();
 
         loadCartDisplay();
 
@@ -224,6 +269,7 @@ import { closeAccount } from "./account.js";
 
     function buildCartRow(item, isCart) {
         const price = item.Retail > 0 ? item.Retail : item.Price;
+        const sale = getDiscount(item);
         return `
             <div class="cartItem" data-item="${item["Item#"]}">
                 <div class="cartImage">
@@ -236,8 +282,8 @@ import { closeAccount } from "./account.js";
                     </a>
                     <p class="sku">${item["Item#"]}</p>
                     <div class="cartAction">
-                        ${isCart ? `<button class="moveWish">Move to Wishlist</button>` :
-                            item.Stock > 0 ? `<button class="moveCart">Move to Cart</button>` : ""}
+                        <!--${isCart ? `<button class="moveWish">Move to Wishlist</button>` :
+                            item.Stock > 0 ? `<button class="moveCart">Move to Cart</button>` : ""}-->
                         <button class="cartRemove">Remove</button>
                     </div>
                 </div>
@@ -245,7 +291,7 @@ import { closeAccount } from "./account.js";
                 <div class="cartUnitPrice">
                     Price:
                     ${isCart ? `</br>` : " "}
-                    ${moneyFormat(price)}
+                    ${isCart ? moneyFormat(price) : moneyFormat(sale)}
                 </div>
                 
                 ${isCart ? `
@@ -321,7 +367,7 @@ import { closeAccount } from "./account.js";
             const itemNumber = cartItem.dataset.item;
 
             if (event.target.classList.contains("cartRemove")){
-                removeCartList(array, itemNumber);
+                void removeCartList(array, itemNumber);
             } else if (event.target.classList.contains("moveWish")) {
                 moveToList(itemNumber);
             } else if (event.target.classList.contains("moveCart")) {
@@ -342,10 +388,6 @@ import { closeAccount } from "./account.js";
     }
 
 //functions used for cart box
-    export function closeCart(){
-        document.getElementById("cartNavBox")?.classList.remove("open");
-    }
-
     export function initializeCart() {
         const cartButton = document.getElementById("cartButton");
         const cartNavBox = document.getElementById("cartNavBox");
@@ -365,4 +407,21 @@ import { closeAccount } from "./account.js";
         cartNavBox.onclick = function(event){
             event.stopPropagation();
         };
-    }    
+    }
+
+    async function syncWishlistChange(itemNumber, adding) {
+        const user = await getCurrentUser();
+
+        if (!user) {
+            if (adding) saveWishlist();
+            return false;
+        }
+
+        if (adding) {
+            await addRemoteWishlistItem(itemNumber);
+        } else {
+            await removeRemoteWishlistItem(itemNumber);
+        }
+
+        return true;
+    }

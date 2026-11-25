@@ -1,7 +1,7 @@
 //Coded by APR 2026
 
 import { moneyFormat, showToast, applyNavigation, renderCategoryPath, 
-        trackCategoryPath } from "./ui.js";
+        trackCategoryPath, formatText } from "./ui.js";
 
 import { shopping, inventory, data, page,
         findByProperty, buildLink, getParams } from "./state.js";
@@ -9,14 +9,20 @@ import { shopping, inventory, data, page,
 import { removeCartList, moveToList, moveToCart, cartQuantityAdj, 
         figureTotal, addToCartList, updateCartCount, loadCart,
         loadWishlist, loadCartDisplay, getDiscount, addCartListners,
-        cartItemListner, closeCart, initializeCart } from "./cart.js";
+        cartItemListner, initializeCart } from "./cart.js";
 
-import { closeAccount, initializeAccount } from "./account.js";
+import { initializeAccount, setAccountMenuRefresher } from "./account.js";
 
-import { closeSearch, initializeSearch } from "./search.js";
+import { initializeSearch, runSearch } from "./search.js";
 
 import { initilalizeCatologPage, getFeaturedInventory, renderFeaturedProducts,
-        quickViewBtnListners, loadProductViewHtml } from "./catalog.js";
+        quickViewBtnListners, loadProductViewHtml, setCatalogRenderHelpers } from "./catalog.js";
+
+import { signUp, getCurrentUser } from "./accountManager.js";
+
+import { loadAccountWishlist } from "./wishlistSync.js";
+
+setCatalogRenderHelpers({ initializeCarousel, renderProductPage });
 
 // helper functions
     async function loadHTML(id, file){ //takes the tag's id for insertion and the html file to be inserted
@@ -63,37 +69,48 @@ function setupExternalLinks(){
 
 //functions for the navigation bar
     /*function to load navigation bar */
-    function createMenu(items, topLevel = true, addSearch = true){
-        var html = "";
+    function createMenu(items, topLevel = true,
+        addSearch = true, accountHtml = "") {
+        let html = "";
+
         items.forEach(item => {
-            /*item has dropdown*/
             if (item.showInNav === false) {
-                if (item.children) html += createMenu(item.children, true, false);
+                if (item.children?.length) {
+                    html += createMenu(item.children, true, false);
+                }
                 return;
             }
 
             const itemClass = topLevel ? "tabitem" : "dropdownitem";
             const dropdownClass = topLevel ? "dropdown" : "subdropdown";
 
-            if(item.children.length >= 1){
+            if (item.children?.length > 0) {
                 html += `
                     <div class="${itemClass}">
-                        <a href="${buildLink(item)}"> ${item.title}</a>
+                        <a href="${buildLink(item)}">${item.title}</a>
 
-                        <div class="${dropdownClass}"> ${createMenu(item.children, false, false)} </div>
-                    </div>                
+                        <div class="${dropdownClass}">
+                            ${createMenu(item.children, false, false)}
+                        </div>
+                    </div>
                 `;
+            } else {
+                if (topLevel) {
+                    html += `
+                        <div class="${itemClass}">
+                            <a href="${buildLink(item)}">${item.title}</a>
+                        </div>
+                    `;
+                } else {
+                    html += `<a href="${buildLink(item)}">${item.title}</a>`;
+                }
             }
-            /* no children link */
-            else {
-                if(topLevel) html += `<div class="${itemClass}"> <a href="${buildLink(item)}"> ${item.title} </a> </div>`;
-                else html += `<a href="${buildLink(item)}">${item.title}</a>`;              
-            }        
         });
-        if (addSearch){//search icon and bar
+
+        if (addSearch) {
             html += loadSearchNav();
             html += loadCartNav();
-            html += loadAccountNav();    
+            html += accountHtml;
         }
 
         return html;
@@ -126,14 +143,25 @@ function setupExternalLinks(){
                     </svg>
                     <div id="cartCount"></div>
                     <div id="cartNavBox">
-                        <a href="cart.html">View Cart</a>
+                        <!--<a href="cart.html">View Cart</a>-->
                         <a href="wishlist.html">View Wishlist</a>
                     </div>
                 </div>
             </div>
         `;
     }
-    function loadAccountNav(){
+    async function loadAccountNav(userOverride){
+        let user = userOverride;
+        if (user === undefined) {
+            user = null;
+            try {
+                user = await getCurrentUser();
+            } catch (error) {
+                // Account lookup should not prevent the public storefront from rendering.
+                console.error("Account status unavailable:", error);
+            }
+        }
+
         return `
             <div class="tabitem">
                 <div id="accountButton">
@@ -143,12 +171,61 @@ function setupExternalLinks(){
                         0-5.433-.608-7.812-1.7a.75.75 0 0 1-.437-.695Z" clip-rule="evenodd" />
                     </svg>
                     <div id="accountBox">
-                        <div>Signed out</div>
-                        <div></div>
+                        ${user ?
+                            `
+                            <div id="signOutButton">
+                                Sign Out
+                            </div>
+                            `
+                            :
+
+                            `
+                            <p> Email Address </p>
+                            <div> <input type="text" id="emailSignIn"></div>
+                            <p> Password </p>
+                            <div> <input type="password" id="passwordSignIn"></div>
+
+                            <div id="showPasswordRow">
+                                <label for="showPassword"> Show password </label>
+                                <input type="checkbox" id="showPassword">
+                            </div>
+
+                            <div id="signinForgot">
+                                <div id="forgotPass">
+                                    <a href=""> Forgot Password? </a>
+                                </div>
+
+                                <div id="signInButton">
+                                    Sign In
+                                </div>
+
+                                <div id="register">
+                                    <a href="register.html"> Create an Account </a>
+                                </div>
+                            </div>
+                            `
+                        }
                     </div>
                 </div>
             </div>
         `;
+    }
+
+    export async function refreshAccountNav(userOverride) {
+        const oldAccount = document.getElementById("accountButton");
+
+        if (!oldAccount) return;
+
+        const html = await loadAccountNav(userOverride);
+
+        const wrapper = document.createElement("div");
+        wrapper.innerHTML = html.trim();
+
+        const newAccount = wrapper.firstElementChild;
+
+        oldAccount.closest(".tabitem").replaceWith(newAccount);
+
+        initializeAccount();
     }
 
 //functions for the use of config.json file
@@ -180,7 +257,7 @@ function setupExternalLinks(){
 //catalog page inventory display functions
 
 //********* generic carousel **********/
-    export function initializeCarousel({track, lbtn, rbtn, slideWidth, unit, loop = false, cloneCount, viewCount, container = document}){
+    export function initializeCarousel({track, lbtn, rbtn, slideWidth, unit, loop = false, cloneCount, viewCount, container = document, auto = false}){
         if (!track) return;
         console.log("running: ", track.children);
         console.log(track);
@@ -210,7 +287,7 @@ function setupExternalLinks(){
 
         if (rbtn && lbtn){
             lbtn.addEventListener("click", () => {
-                pauseAutoPlay();
+                if (auto) pauseAutoPlay();
                 if(!loop){
                     if (index > 0) shift(-1);
                     return;
@@ -230,7 +307,7 @@ function setupExternalLinks(){
             });
 
             rbtn.addEventListener("click", () => {
-                pauseAutoPlay();
+                if (auto) pauseAutoPlay();
                 if (!loop){
                     if (index == slides.length - viewCount) return;                 
                 }
@@ -367,8 +444,13 @@ function setupExternalLinks(){
         container.querySelector("#productImg").src = "inventory/inventory-images/"+product["Product Image"];
 
         container.querySelector("#productName").textContent = product["Product Name"];
-        if (container.querySelector("#descriptionScroll"))
-            container.querySelector("#descriptionScroll").textContent = product["Description"];
+
+        const descriptionBox = container.querySelector("#descriptionScroll");
+
+        if (descriptionBox) {
+            descriptionBox.innerHTML = formatText(product["Description"]);
+        }
+
         container.querySelector("#priceDiv").innerHTML = getProductPriceHtml(product);
 
         const imageHtml = images.map(image => `
@@ -388,7 +470,8 @@ function setupExternalLinks(){
             'loop': images.length > imgInView,
             'cloneCount': imgInView,
             'viewCount': imgInView,
-            'container': container
+            'container': container,
+            'auto': false
         });
 
         container.querySelector("#itemID").textContent = "Item#: "+product["Item#"];
@@ -397,6 +480,119 @@ function setupExternalLinks(){
     }
 //******** end product page fuctions *********/
 
+//******** registration functions ***********/
+
+    let registrationTimer;
+
+    function initializeRegistration() {
+        const form = document.getElementById("registerPanel");
+
+        if (!form) return;
+
+        const execute = document.getElementById("confirmRegister");
+
+        resetRegistrationTimer();
+
+        form.addEventListener("input", resetRegistrationTimer);
+        form.addEventListener("click", resetRegistrationTimer);
+        form.addEventListener("keydown", resetRegistrationTimer);
+
+        execute.addEventListener("click", makeAccount);
+    }
+
+    function resetRegistrationTimer() {
+        clearTimeout(registrationTimer);
+
+        registrationTimer = setTimeout(() => {
+            cancelRegistration();
+        }, 5 * 60 * 1000); 
+    }
+
+    function cancelRegistration() {
+        const form = document.getElementById("registerPanel");
+
+        if (form) form.reset();
+
+        showToast("Your registration expired due to inactivity.");
+
+        setTimeout(() => {
+            window.location.href = "index.html";
+        }, 3000);
+    }
+
+
+    function makeAccount() {
+        const firstName = document.getElementById("firstNameInput").value.trim();
+        const lastName = document.getElementById("lastNameInput").value.trim();
+        const email = document.getElementById("emailInput").value.trim();
+        const username = document.getElementById("usernameInput").value.trim();
+        const password = document.getElementById("passwordInput").value;
+        const cPassword = document.getElementById("confirmPasswordInput").value;
+
+        if (firstName.length < 2) {
+            showToast("First name must be two charaters or longer");
+            return;
+        }
+        if (lastName.length < 2) {
+            showToast("First name must be two charaters or longer");
+            return;
+        }
+        if (!email.includes("@") || email.length == 0) {
+            showToast("Enter a valid E-mail");
+            return;
+        }
+        if (username.length == 0) {
+            showToast("Enter a valid Username");
+            return;
+        }
+
+        const hasLetter = /[A-Za-z]/.test(password);
+        const hasNumber = /\d/.test(password);
+        const hasSpecial = /[^A-Za-z0-9]/.test(password);
+        if (password.length < 8 || !hasLetter || !hasNumber || !hasSpecial) {
+            showToast("Password does not meet requirments");
+            return;
+        }
+        if (cPassword !== password || cPassword.length == 0) {
+            showToast("Confirm password faild");
+            return;
+        }
+
+        register();
+
+    }
+
+    async function register() {
+        const email = document.getElementById("emailInput").value.trim();
+        const password = document.getElementById("passwordInput").value;
+        const firstName = document.getElementById("firstNameInput").value.trim();
+        const lastName = document.getElementById("lastNameInput").value.trim();
+        const username = document.getElementById("usernameInput").value.trim();
+
+        const execute = document.getElementById("confirmRegister");
+
+        execute.disabled = true;
+
+        try {
+            await signUp(email, password, firstName, lastName, username);
+
+            clearTimeout(registrationTimer);
+
+            showToast("Check your email to verify your account.");
+
+            document.getElementById("registerPanel").reset();
+
+        } catch (error) {
+            console.error("Registration failed:", error);
+
+            showToast(error.message || "Registration failed.");
+
+        } finally {
+            execute.disabled = false;
+        }
+    }
+
+//*********** end registration functions ************/
 
 function loadCopyright() {
     document.getElementById("copyright").innerHTML = `
@@ -413,12 +609,17 @@ function loadCopyright() {
 
         loadCopyright();
 
-        document.getElementById("tabbar").innerHTML = createMenu(data.navigation);
+        const accountHtml = await loadAccountNav();
 
-        await setupExternalLinks();
+        document.getElementById("tabbar").innerHTML =
+            createMenu(data.navigation, true, true, accountHtml);
 
-        await applyConfig(); 
-        await applyNavigation(data.navigation);
+        setAccountMenuRefresher(refreshAccountNav);
+
+        setupExternalLinks();
+
+        applyConfig();
+        applyNavigation(data.navigation);
 
         document.querySelectorAll(".tabitem").forEach(tab => { //menudrop down direction
             tab.addEventListener("mouseenter", function(){
@@ -463,25 +664,45 @@ function loadCopyright() {
             }
         );
 
-        await getFeaturedInventory();
+        getFeaturedInventory();
 
         renderFeaturedProducts();
 
         renderProductPage(null, document.getElementById("quickViewWindow"));
         quickViewBtnListners();
 
-        await initializeSearch();
-        await initializeAccount();
-        await initializeCart();
+        initializeSearch();
+        initializeAccount();
+        initializeCart();
+
 
         loadCart();
-        loadWishlist();
+
+        let user = null;
+        try {
+            user = await getCurrentUser();
+        } catch (error) {
+            console.error("Account status unavailable; loading guest wishlist:", error);
+        }
+
+        if (user) {
+            try {
+                await loadAccountWishlist();
+            } catch (error) {
+                console.error("Account wishlist could not be loaded:", error);
+                loadWishlist();
+                showToast("Your account wishlist could not be loaded. Please try again.");
+            }
+        } else {
+            loadWishlist();
+        }
+
         updateCartCount();
+
         const close = document.getElementById("toastClose");
         if (close) {
             close.addEventListener("click", () => {
                 document.getElementById("toast").hidden = true;
-                clearTimeout(toastTimer);
             });
         }
 
@@ -615,9 +836,6 @@ function loadCopyright() {
                                     Best battery replacement: $50.00. We replace the battery and offer a five year warranty. 
                                     Should the battery fail at any time during the five year period, we will replace it at no 
                                     charge.
-                                </li>
-                                <li>
-                                    Alternatively, you may request a battery without a warranty: $15.00
                                 </li>
                             </ol>
                         <p>
@@ -776,12 +994,14 @@ function loadCopyright() {
 
 //loads pages on start up
     document.addEventListener("DOMContentLoaded", async () => {
+        try {
         await initializePage();
 
         const path = window.location.pathname;
 
         if (getParams().get("slug")) {
             await initilalizeCatologPage();
+            if (getParams().get("search")) runSearch();
             
             const sideTab = document.getElementById("side-tab");
 
@@ -815,7 +1035,8 @@ function loadCopyright() {
                 'unit': '%',
                 'loop': true,
                 'cloneCount': 1,
-                'viewCount': 1
+                'viewCount': 1,
+                'auto': true
             });
             carousel.startAutoPlay();
         }
@@ -830,5 +1051,15 @@ function loadCopyright() {
             cartItemListner();
             figureTotal();
         }
-    
+
+        if (path.endsWith("register.html")) {
+            initializeRegistration();
+            return;
+        }
+
+        } catch (error) {
+            console.error("Page initialization failed:", error);
+            document.body.style.opacity = "1";
+            showToast("Some page content could not be loaded. Please refresh the page.");
+        }
     });

@@ -4,12 +4,9 @@ import { inventory, page, data, getParams, findByProperty } from "./state.js";
 
 import { updateValues, renderCatalog, renderAtributeTab } from "./catalog.js";
 
-import { closeAccount } from "./account.js";
-import { closeCart } from "./cart.js";
+import { closeAccount, closeCart, closeSearch } from "./panels.js";
 
-    export function closeSearch() {
-        document.getElementById("searchBox")?.classList.remove("open");
-    }
+import { recordSearch } from "./searchAnalytics.js";
 
     export function initializeSearch(){
         const search = document.getElementById("search");
@@ -78,6 +75,9 @@ import { closeCart } from "./cart.js";
         page.resetPage = true;
 
         catName.textContent = category.title + " search results for: \"" + prompt + "\"";
+        
+        const results = getCurrentInventory();
+        void recordSearch(prompt, results.length);
     }
 
     export function getSearchPrompt(){

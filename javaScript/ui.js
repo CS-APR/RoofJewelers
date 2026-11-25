@@ -12,6 +12,11 @@ import { findByProperty, buildLink, getParams, data } from "./state.js";
         const toast = document.getElementById("toast");
         const text = document.getElementById("toastMessage");
 
+        if (!toast || !text) {
+            console.warn(message);
+            return;
+        }
+
         text.textContent = message;
         toast.hidden = false;
 
@@ -91,4 +96,36 @@ import { findByProperty, buildLink, getParams, data } from "./state.js";
     //descriptions for the category pages
     export function loadCategoryDescription(category){
         document.getElementById("cat-description").innerText = category.description || "";
+    }
+
+
+    export function formatText(text) {
+        const parts = text.split("|");
+
+        let html = "";
+        let inList = false;
+
+        for (const part of parts) {
+            const value = part.trim();
+
+            if (value.startsWith("*")) {
+                if (!inList) {
+                    html += "<ul>";
+                    inList = true;
+                }
+
+                html += `<li>${value.substring(1).trim()}</li>`;
+            } else {
+                if (inList) {
+                    html += "</ul>";
+                    inList = false;
+                }
+
+                if (value) html += `<p>${value}</p>`;
+            }
+        }
+
+        if (inList) html += "</ul>";
+
+        return html;
     }

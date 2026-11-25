@@ -2,14 +2,42 @@
 
 import { inventory, data, page, getParams, findByProperty } from "./state.js";
 
-import { initializeCarousel, getProductStatus, renderProductPage } from "./main.js";
-
 import { renderCategoryPath, getSubCategories, trackCategoryPath,
         loadCategoryDescription, moneyFormat } from "./ui.js";
 
-import { runSearch, rebuildActiveInventory, getCurrentInventory} from "./search.js";
-
 import { getDiscount, addCartListners } from "./cart.js";
+
+let initializeCarousel = () => {};
+let renderProductPage = () => {};
+
+export function setCatalogRenderHelpers(helpers) {
+    initializeCarousel = helpers.initializeCarousel;
+    renderProductPage = helpers.renderProductPage;
+}
+
+export function getProductStatus(product) {
+    return product["Stock"] < 1 ? "Out-of-Stock" : "In Stock";
+}
+
+function getCurrentInventory() {
+    if (inventory.searchResults !== null) return inventory.searchResults;
+    return getParams().has("slug") ? inventory.catInventory : inventory.inventory;
+}
+
+function rebuildActiveInventory() {
+    if (inventory.sortedInventory !== null) {
+        inventory.activeInventory = inventory.sortedInventory;
+    } else if (inventory.searchResults !== null) {
+        inventory.activeInventory = inventory.searchResults;
+    } else {
+        inventory.activeInventory = getParams().has("slug")
+            ? inventory.catInventory
+            : inventory.inventory;
+    }
+
+    updateValues(inventory.activeInventory);
+    renderCatalog(inventory.activeInventory);
+}
 
 //******* functions to get the catalog/featured inventory ********/
     export function getCategoryInventory(){ //gets the items specific to the category
@@ -369,6 +397,7 @@ import { getDiscount, addCartListners } from "./cart.js";
                             <div id="priceDiv"></div>
                         </div>
                         <div id="addCartList">
+                            <!--
                             <div id="cartRow">
                                 ${product["Stock"] > 0 && ((product["Price"] || product["Retail"]) > 0) ?
                                     `<div class="quantityControls">
@@ -382,6 +411,7 @@ import { getDiscount, addCartListners } from "./cart.js";
                                     `<button id="addToCart">Add to Cart</button>` : ""
                                 }
                             </div>
+                            -->
                             <button id="addToWish">Add to Wishlist</button>
                             ${quickview ? `
                                 <a href="productPage.html?item=${product["Item#"].trim()}&category=${product["Category"]}&page=${page.currentPage  }">
@@ -433,7 +463,10 @@ import { getDiscount, addCartListners } from "./cart.js";
             } else if (item.Featured) {
                 ribbonText = "Featured";
                 ribbonClass += "-featured";
-            }          
+            } else if (item.Discontinued) {
+                ribbonText = "Discontinued";
+                ribbonClass += "-sold";
+            }
 
             html += `
                 <div class="item-card">
@@ -667,6 +700,5 @@ import { getDiscount, addCartListners } from "./cart.js";
 
         if (searchBar) {
             searchBar.value = search || "";
-            if(search) runSearch();
         }
     }

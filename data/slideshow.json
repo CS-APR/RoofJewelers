@@ -4,8 +4,8 @@
     "link": "/catalog.html?slug\u003dthorsten-rings"
   },
   {
-    "image": "citizen-banner.jpg",
-    "link": "/catalog.html?slug\u003dcitizen"
+    "image": "citizen_v2.jpg",
+    "link": "/catalog.html?slug\u003dwatches"
   },
   {
     "image": "southern-gates-banner.jpg",
@@ -16,15 +16,15 @@
     "link": ""
   },
   {
+    "image": "pearl-Banner.jpg",
+    "link": "/catalog.html?slug\u003dpearls"
+  },
+  {
     "image": "Gold-Jewelry.jpg",
     "link": ""
   },
   {
     "image": "Lab-Grown-Diamonds.jpg",
     "link": ""
-  },
-  {
-    "image": "pearl-jewelry.jpg",
-    "link": "/catalog.html?slug\u003dpearls"
   }
 ]
