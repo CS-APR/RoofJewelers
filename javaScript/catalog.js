@@ -510,12 +510,12 @@ function rebuildActiveInventory() {
         `;
         document.getElementById("featured").innerHTML = html;
     }
-    export function loadFeaturedButtons(){
+    export function loadFeaturedButtons(viewCount = 4){
         if (!document.getElementById("featured-track")) return;
 
         const track = document.getElementById("featured-track").children;
         var html = "";
-        if (track.length > 4) {
+        if (track.length > viewCount) {
             html = `
                 <span class="arrow" id="fLeft" style="transform: rotateY(180deg);">&nbsp&#10148;</span>
                 <span class="arrow" id="fRight">&nbsp&#10148;</span>
@@ -529,7 +529,7 @@ function rebuildActiveInventory() {
 
         loadFeaturedHtml();
         renderProductCards(inventory.featuredInventory, "featured-track", true);
-        loadFeaturedButtons();
+        loadFeaturedButtons(cardView);
 
         initializeCarousel({
             'track': document.getElementById("featured-track"),
