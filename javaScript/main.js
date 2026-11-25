@@ -108,9 +108,11 @@ function setupExternalLinks(){
         });
 
         if (addSearch) {
+            html += `<div id="menus">`;
             html += loadSearchNav();
             html += loadCartNav();
             html += accountHtml;
+            html += `</div>`;
         }
 
         return html;

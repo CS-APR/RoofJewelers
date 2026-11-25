@@ -87,6 +87,11 @@ p{
             display: block;
             padding: 10px;
         }
+        .tabbar #menus {
+            display: flex;
+            
+            
+        }
 
     /* search bar styling*/
         .tabitem #search{
@@ -595,8 +600,8 @@ p{
         width: 100%;
         justify-content: center;
     }
-    #featured-viewport{
-        width: 90%;
+    #featured-viewport{    
+        width: 90.3%;
         margin-left:auto; margin-right: auto;
         overflow: hidden;
     }
@@ -982,7 +987,7 @@ p{
                 justify-content: center;
                 text-align: center;
 
-                margin: 10px;                       
+                margin: 10px;
             }
             .item-card:hover{
                 outline: 5px solid gray;
