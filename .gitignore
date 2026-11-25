@@ -1,0 +1,29 @@
+# Local credentials and environment files
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+
+# Supabase CLI state (project linkage and local CLI version)
+supabase/.temp/
+
+# Local editor, workstation, and planning files
+.vscode/
+.idea/
+.local/
+/todo.txt
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Local backend databases and build output
+/database/
+*.db
+*.sqlite
+*.sqlite3
+/target/
+*.class
